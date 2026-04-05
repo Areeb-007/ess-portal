@@ -3,15 +3,49 @@ import { useApp } from '../context/AppContext.jsx'
 
 const REQUEST_TYPES = ['Leave', 'Remote Work Request', 'Missing Punch', 'Financial Claim', 'Business Trip']
 
-const STATUS_CYCLE = { Pending: 'Approved', Approved: 'Rejected', Rejected: 'Pending' }
-
-const TYPE_ICONS = {
-  Leave: '🌴',
-  'Remote Work Request': '🏠',
-  'Missing Punch': '⏰',
-  'Financial Claim': '💰',
-  'Business Trip': '✈️',
-}
+const REQUEST_CARDS = [
+  {
+    type: 'Leave',
+    icon: (
+      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    type: 'Remote Work Request',
+    label: 'Remote Work Request',
+    icon: (
+      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    type: 'Missing Punch',
+    icon: (
+      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    type: 'Financial Claim',
+    icon: (
+      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    type: 'Business Trip',
+    icon: (
+      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+      </svg>
+    ),
+  },
+]
 
 function LeaveFields({ form, setForm }) {
   return (
@@ -21,12 +55,8 @@ function LeaveFields({ form, setForm }) {
           <label className="label-text">Leave Type</label>
           <select value={form.leaveType || ''} onChange={e => setForm(f => ({ ...f, leaveType: e.target.value }))} className="input-field">
             <option value="">Select type</option>
-            <option>Annual Leave</option>
-            <option>Sick Leave</option>
-            <option>Casual Leave</option>
-            <option>Maternity Leave</option>
-            <option>Paternity Leave</option>
-            <option>Unpaid Leave</option>
+            <option>Annual Leave</option><option>Sick Leave</option><option>Casual Leave</option>
+            <option>Maternity Leave</option><option>Paternity Leave</option><option>Unpaid Leave</option>
           </select>
         </div>
         <div>
@@ -81,10 +111,7 @@ function MissingPunchFields({ form, setForm }) {
       <div>
         <label className="label-text">Punch Type</label>
         <select value={form.punchType || ''} onChange={e => setForm(f => ({ ...f, punchType: e.target.value }))} className="input-field">
-          <option value="">Select</option>
-          <option>Check In</option>
-          <option>Check Out</option>
-          <option>Both</option>
+          <option value="">Select</option><option>Check In</option><option>Check Out</option><option>Both</option>
         </select>
       </div>
       <div>
@@ -102,12 +129,8 @@ function FinancialClaimFields({ form, setForm }) {
         <div>
           <label className="label-text">Claim Type</label>
           <select value={form.claimType || ''} onChange={e => setForm(f => ({ ...f, claimType: e.target.value }))} className="input-field">
-            <option value="">Select</option>
-            <option>Medical</option>
-            <option>Travel</option>
-            <option>Communication</option>
-            <option>Equipment</option>
-            <option>Other</option>
+            <option value="">Select</option><option>Medical</option><option>Travel</option>
+            <option>Communication</option><option>Equipment</option><option>Other</option>
           </select>
         </div>
         <div>
@@ -161,11 +184,11 @@ export default function Requests() {
   const [showModal, setShowModal] = useState(false)
   const [requestType, setRequestType] = useState('Leave')
   const [form, setForm] = useState({})
-  const [filter, setFilter] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
 
-  function openModal() {
+  function openModal(type) {
     setForm({})
-    setRequestType('Leave')
+    setRequestType(type || 'Leave')
     setShowModal(true)
   }
 
@@ -183,143 +206,142 @@ export default function Requests() {
     setShowModal(false)
   }
 
-  function cycleStatus(id, currentStatus) {
-    dispatch({
-      type: 'UPDATE_REQUEST_STATUS',
-      payload: { id, status: STATUS_CYCLE[currentStatus] || 'Pending' }
-    })
-  }
-
-  const filtered = filter === 'All'
-    ? state.requests
-    : state.requests.filter(r => r.status === filter)
+  const filtered = state.requests.filter(r => {
+    if (!searchQuery) return true
+    return r.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           (r.claimType || '').toLowerCase().includes(searchQuery.toLowerCase())
+  })
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">My Requests</h1>
-          <p className="text-slate-400 text-sm mt-1">Manage and track your HR requests</p>
-        </div>
-        <button onClick={openModal} className="btn-primary flex items-center gap-2">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+    <div className="max-w-5xl mx-auto space-y-4">
+      {/* Header Banner */}
+      <div className="bg-gray-700 rounded-2xl p-5 flex items-center gap-4">
+        <div className="w-12 h-12 bg-gray-600 rounded-xl flex items-center justify-center flex-shrink-0">
+          <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          Create Request
-        </button>
+        </div>
+        <div>
+          <h1 className="text-white font-bold text-lg">My Request</h1>
+          <p className="text-gray-400 text-sm">Request management system to handle various employee requests efficiently.</p>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: 'Total', value: state.requests.length, color: 'blue' },
-          { label: 'Pending', value: state.requests.filter(r => r.status === 'Pending').length, color: 'amber' },
-          { label: 'Approved', value: state.requests.filter(r => r.status === 'Approved').length, color: 'emerald' },
-          { label: 'Rejected', value: state.requests.filter(r => r.status === 'Rejected').length, color: 'red' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="glass-card p-4 text-center">
-            <div className={`text-2xl font-bold text-${color}-400`}>{value}</div>
-            <div className="text-slate-400 text-xs mt-1">{label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Filter */}
-      <div className="glass-card p-4">
-        <div className="flex flex-wrap gap-2">
-          {['All', 'Pending', 'Approved', 'Rejected'].map(f => (
+      {/* Create New Requests */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <h2 className="text-gray-800 font-semibold mb-4">Create New Requests</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {REQUEST_CARDS.map(card => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                filter === f
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-              }`}
+              key={card.type}
+              onClick={() => openModal(card.type)}
+              className="relative flex flex-col items-center justify-center gap-2 p-4 border border-gray-200 rounded-xl hover:border-tmc-300 hover:bg-tmc-50 transition-all group"
             >
-              {f}
+              <span className="absolute -top-2 -right-2 w-5 h-5 bg-tmc-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow">+</span>
+              {card.icon}
+              <span className="text-gray-600 text-xs font-medium text-center group-hover:text-tmc-700">
+                {card.label || card.type}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Requests list */}
-      <div className="space-y-3">
-        {filtered.length === 0 ? (
-          <div className="glass-card p-12 text-center text-slate-400">
-            <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      {/* Requests List */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-gray-800 font-semibold">Requests</h2>
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p>No requests found.</p>
-            <button onClick={openModal} className="btn-primary mt-4 text-sm">Create your first request</button>
+            <input
+              type="text"
+              placeholder="Search requests..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-tmc-400 focus:ring-2 focus:ring-tmc-100"
+            />
+          </div>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="text-center py-12 text-gray-400">
+            <svg className="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <p className="text-sm">No requests found.</p>
           </div>
         ) : (
-          filtered.map(req => (
-            <div key={req.id} className="glass-card p-5">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{TYPE_ICONS[req.type] || '📋'}</span>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-white font-semibold">{req.type}</span>
-                      {req.leaveType && <span className="text-slate-400 text-sm">· {req.leaveType}</span>}
-                      {req.claimType && <span className="text-slate-400 text-sm">· {req.claimType}</span>}
-                    </div>
-                    <div className="text-slate-400 text-xs mt-1">
-                      Submitted: {new Date(req.createdAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </div>
-                    {(req.startDate || req.date) && (
-                      <div className="text-slate-400 text-xs">
-                        {req.date ? `Date: ${req.date}` : `${req.startDate}${req.endDate ? ` → ${req.endDate}` : ''}`}
-                        {req.days ? ` (${req.days} days)` : ''}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left text-gray-500 font-medium pb-3 pr-4 text-xs uppercase tracking-wider">Request Type</th>
+                  <th className="text-left text-gray-500 font-medium pb-3 pr-4 text-xs uppercase tracking-wider">Submission Date</th>
+                  <th className="text-left text-gray-500 font-medium pb-3 pr-4 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-left text-gray-500 font-medium pb-3 text-xs uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(req => (
+                  <tr key={req.id} className="border-b border-gray-50 last:border-0">
+                    <td className="py-4 pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="text-gray-800 font-medium">
+                            {req.claimType ? `${req.claimType}` : req.type}
+                          </div>
+                          {req.reason && (
+                            <div className="text-gray-400 text-xs">{req.reason}</div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    {req.reason && (
-                      <p className="text-slate-300 text-sm mt-1.5 max-w-lg">{req.reason}</p>
-                    )}
-                    {req.amount && (
-                      <div className="text-emerald-400 text-sm font-semibold mt-1">PKR {Number(req.amount).toLocaleString()}</div>
-                    )}
-                    {req.destination && (
-                      <div className="text-slate-300 text-sm mt-1">{req.destination} — {req.purpose}</div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => cycleStatus(req.id, req.status)}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${
-                      req.status === 'Pending' ? 'badge-pending' :
-                      req.status === 'Approved' ? 'badge-approved' : 'badge-rejected'
-                    }`}
-                    title="Click to cycle status (demo)"
-                  >
-                    {req.status}
-                  </button>
-                  <button
-                    onClick={() => dispatch({ type: 'DELETE_REQUEST', payload: req.id })}
-                    className="text-slate-500 hover:text-red-400 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
+                    </td>
+                    <td className="py-4 pr-4 text-gray-600">
+                      {new Date(req.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </td>
+                    <td className="py-4 pr-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        req.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                        req.status === 'Approved' ? 'bg-tmc-50 text-tmc-700 border border-tmc-200' :
+                        'bg-red-50 text-red-600 border border-red-200'
+                      }`}>
+                        {req.status}
+                      </span>
+                    </td>
+                    <td className="py-4">
+                      <button
+                        onClick={() => dispatch({ type: 'DELETE_REQUEST', payload: req.id })}
+                        className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative glass-card w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-white rounded-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Create Request</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white">
+              <h3 className="text-gray-800 text-xl font-bold">Create Request</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -327,7 +349,6 @@ export default function Requests() {
             </div>
 
             <div className="space-y-5">
-              {/* Request type */}
               <div>
                 <label className="label-text">Request Type</label>
                 <div className="flex flex-wrap gap-2 mt-1">
@@ -337,17 +358,16 @@ export default function Requests() {
                       onClick={() => { setRequestType(t); setForm({}) }}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
                         requestType === t
-                          ? 'bg-blue-600 border-blue-500 text-white'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                          ? 'bg-tmc-500 border-tmc-500 text-white'
+                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:text-tmc-600 hover:border-tmc-300'
                       }`}
                     >
-                      {TYPE_ICONS[t]} {t}
+                      {t}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Dynamic fields */}
               {requestType === 'Leave' && <LeaveFields form={form} setForm={setForm} />}
               {requestType === 'Remote Work Request' && <RemoteWorkFields form={form} setForm={setForm} />}
               {requestType === 'Missing Punch' && <MissingPunchFields form={form} setForm={setForm} />}

@@ -1,16 +1,19 @@
 import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { useApp } from '../context/AppContext.jsx'
 import Sidebar from './Sidebar.jsx'
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { state } = useApp()
+  const initials = state.profile.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'MI'
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950">
+    <div className="flex h-screen overflow-hidden bg-gray-100">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-20 bg-black/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -20,24 +23,58 @@ export default function Layout() {
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-slate-900/80 backdrop-blur border-b border-white/10 z-10">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">T</span>
+        {/* Top Header */}
+        <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm z-10">
+          <div className="flex items-center gap-3">
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            {/* TMC ESS Logo */}
+            <div className="flex items-center gap-2">
+              <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
+                <rect x="4" y="2" width="9" height="28" rx="1.5" fill="#374151"/>
+                <rect x="17" y="8" width="9" height="22" rx="1.5" fill="#6b7280"/>
+                <rect x="4" y="2" width="9" height="9" rx="1.5" fill="#1f2937"/>
+              </svg>
+              <span className="text-lg font-bold text-gray-800">TMC</span>
+              <span className="text-tmc-500 text-lg font-bold">ESS</span>
             </div>
-            <span className="text-white font-semibold text-sm">TMC Portal</span>
           </div>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <span className="text-white text-sm font-semibold">MI</span>
+
+          <div className="flex items-center gap-3">
+            {/* Monitor icon */}
+            <button className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </button>
+
+            {/* Notification bell */}
+            <button className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">1</span>
+            </button>
+
+            {/* User dropdown */}
+            <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-tmc-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-xs font-bold">{initials}</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">{state.profile.name}</span>
+              <svg className="w-4 h-4 text-gray-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </header>
 

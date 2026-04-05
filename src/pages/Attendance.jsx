@@ -1,215 +1,229 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext.jsx'
 
-const STATUS_OPTIONS = ['Present', 'Absent', 'Late', 'Half Day', 'Work From Home', 'On Leave']
-const EMPTY_FORM = { date: '', checkIn: '', checkOut: '', status: 'Present' }
+function parseTime(timeStr) {
+  if (!timeStr) return null
+  const [time, period] = timeStr.split(' ')
+  let [h, m] = time.split(':').map(Number)
+  if (period === 'PM' && h !== 12) h += 12
+  if (period === 'AM' && h === 12) h = 0
+  return h * 60 + m
+}
+
+function minutesToHM(mins) {
+  if (mins == null || mins < 0) return '—'
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return `${h}h ${m}m`
+}
+
+function formatMinutesToTime(mins) {
+  if (mins == null) return '—'
+  const h = Math.floor(mins / 60) % 24
+  const m = mins % 60
+  const period = h >= 12 ? 'PM' : 'AM'
+  const hour12 = h % 12 || 12
+  return `${String(hour12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`
+}
+
+const MONTHS = [
+  { value: '2026-04', label: 'April 2026' },
+  { value: '2026-03', label: 'March 2026' },
+  { value: '2026-02', label: 'February 2026' },
+  { value: '2026-01', label: 'January 2026' },
+]
 
 export default function Attendance() {
   const { state, dispatch } = useApp()
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [editId, setEditId] = useState(null)
-  const [filterStatus, setFilterStatus] = useState('All')
-  const [filterMonth, setFilterMonth] = useState('')
+  const [selectedMonth, setSelectedMonth] = useState('2026-04')
 
-  const sorted = [...state.attendance].sort((a, b) => b.date.localeCompare(a.date))
+  const filtered = useMemo(() => {
+    return [...state.attendance]
+      .filter(a => a.date.startsWith(selectedMonth))
+      .sort((a, b) => b.date.localeCompare(a.date))
+  }, [state.attendance, selectedMonth])
 
-  const filtered = sorted.filter(a => {
-    if (filterStatus !== 'All' && a.status !== filterStatus) return false
-    if (filterMonth && !a.date.startsWith(filterMonth)) return false
-    return true
-  })
+  // Insights
+  const insights = useMemo(() => {
+    const present = filtered.filter(a => a.checkIn && a.checkOut)
+    const absences = filtered.filter(a => a.status === 'Absent').length
 
-  const presentCount = state.attendance.filter(a => a.status === 'Present').length
-  const absentCount = state.attendance.filter(a => a.status === 'Absent').length
-  const lateCount = state.attendance.filter(a => a.status === 'Late').length
+    const durations = present.map(a => {
+      const ci = parseTime(a.checkIn)
+      const co = parseTime(a.checkOut)
+      return co != null && ci != null ? co - ci : null
+    }).filter(d => d != null && d > 0)
 
-  function handleSubmit() {
-    if (!form.date) return
-    if (editId !== null) {
-      dispatch({ type: 'UPDATE_ATTENDANCE', payload: { ...form, id: editId, missingPunchRequested: false } })
-      setEditId(null)
-    } else {
-      dispatch({
-        type: 'ADD_ATTENDANCE',
-        payload: { ...form, id: Date.now(), missingPunchRequested: false }
-      })
-    }
-    setForm(EMPTY_FORM)
-    setShowForm(false)
+    const checkIns = present.map(a => parseTime(a.checkIn)).filter(t => t != null)
+    const checkOuts = present.map(a => parseTime(a.checkOut)).filter(t => t != null)
+
+    const totalMins = durations.reduce((s, d) => s + d, 0)
+    const avgCi = checkIns.length ? Math.round(checkIns.reduce((s, t) => s + t, 0) / checkIns.length) : null
+    const avgCo = checkOuts.length ? Math.round(checkOuts.reduce((s, t) => s + t, 0) / checkOuts.length) : null
+    const avgDur = durations.length ? Math.round(durations.reduce((s, d) => s + d, 0) / durations.length) : null
+
+    return { totalMins, avgCi, avgCo, avgDur, absences }
+  }, [filtered])
+
+  function statusBadge(record) {
+    if (!record.checkOut && record.checkIn) return { label: 'Missing Punch', cls: 'bg-amber-50 text-amber-700 border border-amber-200' }
+    if (record.status === 'Present') return { label: 'Present', cls: 'bg-tmc-50 text-tmc-700 border border-tmc-200' }
+    if (record.status === 'Absent') return { label: 'Absent', cls: 'bg-red-50 text-red-600 border border-red-200' }
+    return { label: record.status || 'Present', cls: 'bg-gray-100 text-gray-600' }
   }
 
-  function startEdit(record) {
-    setForm({ date: record.date, checkIn: record.checkIn || '', checkOut: record.checkOut || '', status: record.status || 'Present' })
-    setEditId(record.id)
-    setShowForm(true)
+  function locationBadge(location, color) {
+    if (!location) return <span className="text-gray-400 text-xs">N/A</span>
+    const cls = color === 'green'
+      ? 'bg-tmc-50 text-tmc-700 border border-tmc-200'
+      : 'bg-orange-50 text-orange-700 border border-orange-200'
+    return (
+      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${cls}`}>
+        {location}
+      </span>
+    )
   }
 
-  function cancelForm() {
-    setForm(EMPTY_FORM)
-    setEditId(null)
-    setShowForm(false)
+  function calcDuration(record) {
+    const ci = parseTime(record.checkIn)
+    const co = parseTime(record.checkOut)
+    if (ci == null || co == null) return '—'
+    const diff = co - ci
+    if (diff <= 0) return '—'
+    return `${Math.floor(diff / 60)} hours ${diff % 60} minutes`
   }
-
-  function statusBadge(status) {
-    switch (status) {
-      case 'Present': return 'badge-approved'
-      case 'Absent': return 'badge-rejected'
-      case 'Late': return 'badge-pending'
-      case 'Half Day': return 'bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded-full text-xs font-semibold'
-      case 'Work From Home': return 'bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full text-xs font-semibold'
-      case 'On Leave': return 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2.5 py-0.5 rounded-full text-xs font-semibold'
-      default: return 'badge-pending'
-    }
-  }
-
-  // Get unique months for filter
-  const months = [...new Set(state.attendance.map(a => a.date.slice(0, 7)))].sort().reverse()
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto space-y-4">
+      {/* Header Banner */}
+      <div className="bg-gray-700 rounded-2xl p-5 flex items-center gap-4">
+        <div className="w-12 h-12 bg-gray-600 rounded-xl flex items-center justify-center flex-shrink-0">
+          <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Previous Attendance</h1>
-          <p className="text-slate-400 text-sm mt-1">View and manage attendance history</p>
-        </div>
-        {!showForm && (
-          <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Record
-          </button>
-        )}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="glass-card p-4 text-center">
-          <div className="text-2xl font-bold text-white">{state.attendance.length}</div>
-          <div className="text-slate-400 text-xs mt-1">Total Days</div>
-        </div>
-        <div className="glass-card p-4 text-center">
-          <div className="text-2xl font-bold text-emerald-400">{presentCount}</div>
-          <div className="text-slate-400 text-xs mt-1">Present</div>
-        </div>
-        <div className="glass-card p-4 text-center">
-          <div className="text-2xl font-bold text-red-400">{absentCount}</div>
-          <div className="text-slate-400 text-xs mt-1">Absent</div>
-        </div>
-        <div className="glass-card p-4 text-center">
-          <div className="text-2xl font-bold text-amber-400">{lateCount}</div>
-          <div className="text-slate-400 text-xs mt-1">Late</div>
+          <h1 className="text-white font-bold text-lg">My Previous Attendance</h1>
+          <p className="text-gray-400 text-sm">Review your past attendance records</p>
         </div>
       </div>
 
-      {/* Form */}
-      {showForm && (
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-bold text-white mb-4">{editId ? 'Edit Record' : 'Add Attendance Record'}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="label-text">Date *</label>
-              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="input-field" />
-            </div>
-            <div>
-              <label className="label-text">Status</label>
-              <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="input-field">
-                {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="label-text">Check In Time</label>
-              <input type="text" value={form.checkIn} onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))} placeholder="e.g. 09:00 AM" className="input-field" />
-            </div>
-            <div>
-              <label className="label-text">Check Out Time</label>
-              <input type="text" value={form.checkOut} onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))} placeholder="e.g. 06:00 PM" className="input-field" />
-            </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button onClick={handleSubmit} className="btn-primary">{editId ? 'Update Record' : 'Add Record'}</button>
-            <button onClick={cancelForm} className="btn-secondary">Cancel</button>
-          </div>
-        </div>
-      )}
-
-      {/* Filters */}
-      <div className="glass-card p-4 flex flex-wrap gap-4 items-center">
-        <div className="flex flex-wrap gap-2">
-          {['All', 'Present', 'Absent', 'Late', 'Work From Home', 'On Leave'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilterStatus(f)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                filterStatus === f
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        <div className="ml-auto">
+      {/* Insights */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-gray-800 font-semibold">Insights</h2>
           <select
-            value={filterMonth}
-            onChange={e => setFilterMonth(e.target.value)}
-            className="input-field text-sm py-1.5"
+            value={selectedMonth}
+            onChange={e => setSelectedMonth(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:border-tmc-400"
           >
-            <option value="">All Months</option>
-            {months.map(m => (
-              <option key={m} value={m}>
-                {new Date(m + '-01').toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })}
-              </option>
+            {MONTHS.map(m => (
+              <option key={m.value} value={m.value}>{m.label}</option>
             ))}
           </select>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="text-gray-400 text-xs mb-2">Total Time Spent</div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-gray-800 font-bold text-sm">{minutesToHM(insights.totalMins)}</span>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="text-gray-400 text-xs mb-2">Average Check-In Time</div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14" />
+              </svg>
+              <span className="text-gray-800 font-bold text-sm">{formatMinutesToTime(insights.avgCi)}</span>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="text-gray-400 text-xs mb-2">Average Check-Out Time</div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7" />
+              </svg>
+              <span className="text-gray-800 font-bold text-sm">{formatMinutesToTime(insights.avgCo)}</span>
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-4">
+            <div className="text-gray-400 text-xs mb-2">Average Duration</div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-gray-800 font-bold text-sm">{minutesToHM(insights.avgDur)}</span>
+            </div>
+          </div>
+          <div className="bg-red-50 rounded-xl p-4">
+            <div className="text-gray-400 text-xs mb-2">Total Absences</div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span className="text-red-500 font-bold text-sm">{insights.absences}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="glass-card p-12 text-center text-slate-400">
-          <p>No attendance records found.</p>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center text-gray-400">
+          <p>No attendance records for this month.</p>
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-white/10">
+              <thead className="border-b border-gray-100 bg-gray-50">
                 <tr>
-                  {['Date', 'Day', 'Check In', 'Check Out', 'Status', 'Missing Punch', 'Actions'].map(h => (
-                    <th key={h} className="text-left text-slate-400 font-medium px-4 py-3">{h}</th>
-                  ))}
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Date</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Check In</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Check Out</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Duration</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5 text-tmc-500" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/></svg>
+                    Check In
+                  </th>
+                  <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">
+                    <span className="flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/></svg>
+                      Check Out
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(record => (
-                  <tr key={record.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{record.date}</td>
-                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
-                      {new Date(record.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' })}
-                    </td>
-                    <td className="px-4 py-3 text-emerald-400 font-medium whitespace-nowrap">{record.checkIn || '—'}</td>
-                    <td className="px-4 py-3 text-orange-400 font-medium whitespace-nowrap">{record.checkOut || '—'}</td>
-                    <td className="px-4 py-3">
-                      <span className={statusBadge(record.status || 'Present')}>{record.status || 'Present'}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {record.missingPunchRequested
-                        ? <span className="badge-pending">Requested</span>
-                        : <span className="text-slate-600 text-xs">—</span>
-                      }
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <button onClick={() => startEdit(record)} className="btn-success text-xs px-2 py-1">Edit</button>
-                        <button onClick={() => dispatch({ type: 'DELETE_ATTENDANCE', payload: record.id })} className="btn-danger text-xs px-2 py-1">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {filtered.map(record => {
+                  const badge = statusBadge(record)
+                  return (
+                    <tr key={record.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-gray-700 font-medium whitespace-nowrap">
+                        {new Date(record.date + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{record.checkIn || '—'}</td>
+                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{record.checkOut || 'Not recorded'}</td>
+                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{calcDuration(record)}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${badge.cls}`}>{badge.label}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {locationBadge(record.checkInLocation, 'green')}
+                      </td>
+                      <td className="px-4 py-3">
+                        {locationBadge(record.checkOutLocation, 'orange')}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

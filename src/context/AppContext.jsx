@@ -7,8 +7,17 @@ import {
 
 const AppContext = createContext(null)
 
+const DATA_VERSION = 'v2'
+
 function loadFromStorage(key, fallback) {
   try {
+    // Reset all data if version changed
+    if (localStorage.getItem('ess_version') !== DATA_VERSION) {
+      const authStr = localStorage.getItem('ess_auth')
+      localStorage.clear()
+      if (authStr) localStorage.setItem('ess_auth', authStr)
+      localStorage.setItem('ess_version', DATA_VERSION)
+    }
     const stored = localStorage.getItem(key)
     return stored ? JSON.parse(stored) : fallback
   } catch {

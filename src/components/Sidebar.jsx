@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext.jsx'
 const navItems = [
   {
     path: '/',
-    label: 'Dashboard',
+    label: 'Home',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -25,7 +25,7 @@ const navItems = [
   },
   {
     path: '/requests',
-    label: 'My Requests',
+    label: 'My Request',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -55,7 +55,7 @@ const navItems = [
   },
   {
     path: '/attendance',
-    label: 'Attendance',
+    label: 'Previous Attendance',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -78,6 +78,7 @@ const navItems = [
 export default function Sidebar({ isOpen, onClose }) {
   const { dispatch, state } = useApp()
   const navigate = useNavigate()
+  const initials = state.profile.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'MI'
 
   function handleLogout() {
     dispatch({ type: 'LOGOUT' })
@@ -88,45 +89,30 @@ export default function Sidebar({ isOpen, onClose }) {
     <aside
       className={`
         fixed lg:relative inset-y-0 left-0 z-30
-        w-64 flex flex-col
-        bg-slate-900/95 backdrop-blur-xl
-        border-r border-white/10
+        w-56 flex flex-col
+        bg-sidebar
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-          <span className="text-white text-sm font-bold">T</span>
-        </div>
-        <div>
-          <div className="text-white font-bold text-sm leading-tight">TMC Portal</div>
-          <div className="text-slate-400 text-xs">Employee Self-Service</div>
-        </div>
-        <button onClick={onClose} className="ml-auto lg:hidden text-slate-400 hover:text-white">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-white/10">
+        <svg viewBox="0 0 32 32" className="w-8 h-8 flex-shrink-0" fill="none">
+          <rect x="4" y="2" width="9" height="28" rx="1.5" fill="#9ca3af"/>
+          <rect x="17" y="8" width="9" height="22" rx="1.5" fill="#6b7280"/>
+          <rect x="4" y="2" width="9" height="9" rx="1.5" fill="#d1d5db"/>
+        </svg>
+        <span className="text-white font-bold text-base">TMC</span>
+        <span className="text-tmc-400 font-bold text-base">ESS</span>
+        <button onClick={onClose} className="ml-auto lg:hidden text-gray-400 hover:text-white">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      {/* User info */}
-      <div className="px-4 py-4 mx-3 mt-3 rounded-xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/20">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-            <span className="text-white font-semibold text-sm">MI</span>
-          </div>
-          <div className="min-w-0">
-            <div className="text-white font-semibold text-sm truncate">{state.profile.name}</div>
-            <div className="text-slate-400 text-xs">EMP-{state.profile.employeeCode}</div>
-          </div>
-        </div>
-      </div>
-
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <div className="text-slate-500 text-xs font-semibold uppercase tracking-wider px-3 mb-2">Main Menu</div>
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -134,10 +120,10 @@ export default function Sidebar({ isOpen, onClose }) {
             end={item.path === '/'}
             onClick={onClose}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
               ${isActive
-                ? 'bg-gradient-to-r from-blue-600/30 to-indigo-600/30 text-white border border-blue-500/30 shadow-lg shadow-blue-500/10'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-white/10 text-tmc-400 border-l-4 border-tmc-400 pl-2'
+                : 'text-gray-400 hover:text-white hover:bg-white/5 border-l-4 border-transparent pl-2'
               }`
             }
           >
@@ -147,17 +133,13 @@ export default function Sidebar({ isOpen, onClose }) {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 py-4 border-t border-white/10">
+      {/* Getting Started button */}
+      <div className="px-4 py-4">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
+          className="w-full bg-tmc-500 hover:bg-tmc-600 text-white font-semibold py-2.5 rounded-xl transition-all duration-200 text-sm"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Sign Out
+          Getting Started
         </button>
       </div>
     </aside>
