@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useApp } from '../context/AppContext.jsx'
 import Sidebar from './Sidebar.jsx'
+import logoMain from '../assets/logo_main.jpeg'
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -36,14 +37,8 @@ export default function Layout() {
               </svg>
             </button>
             {/* TMC ESS Logo */}
-            <div className="flex items-center gap-2">
-              <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
-                <rect x="4" y="2" width="9" height="28" rx="1.5" fill="#374151"/>
-                <rect x="17" y="8" width="9" height="22" rx="1.5" fill="#6b7280"/>
-                <rect x="4" y="2" width="9" height="9" rx="1.5" fill="#1f2937"/>
-              </svg>
-              <span className="text-lg font-bold text-gray-800">TMC</span>
-              <span className="text-tmc-500 text-lg font-bold">ESS</span>
+            <div className="flex items-center">
+              <img src={logoMain} alt="TMC ESS" className="h-9 w-auto object-contain" />
             </div>
           </div>
 

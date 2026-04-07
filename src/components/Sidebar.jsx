@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext.jsx'
+import logoMain from '../assets/logo_main.jpeg'
 
 const navItems = [
   {
@@ -97,13 +98,7 @@ export default function Sidebar({ isOpen, onClose }) {
     >
       {/* Logo */}
       <div className="flex items-center gap-2 px-5 py-4 border-b border-white/10">
-        <svg viewBox="0 0 32 32" className="w-8 h-8 flex-shrink-0" fill="none">
-          <rect x="4" y="2" width="9" height="28" rx="1.5" fill="#9ca3af"/>
-          <rect x="17" y="8" width="9" height="22" rx="1.5" fill="#6b7280"/>
-          <rect x="4" y="2" width="9" height="9" rx="1.5" fill="#d1d5db"/>
-        </svg>
-        <span className="text-white font-bold text-base">TMC</span>
-        <span className="text-tmc-400 font-bold text-base">ESS</span>
+        <img src={logoMain} alt="TMC ESS" className="h-9 w-auto object-contain flex-shrink-0" />
         <button onClick={onClose} className="ml-auto lg:hidden text-gray-400 hover:text-white">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
