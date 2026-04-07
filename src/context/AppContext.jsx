@@ -7,7 +7,7 @@ import {
 
 const AppContext = createContext(null)
 
-const DATA_VERSION = 'v2'
+const DATA_VERSION = 'v3'
 
 function loadFromStorage(key, fallback) {
   try {
@@ -38,6 +38,7 @@ function getInitialState() {
     requests: loadFromStorage('ess_requests', mockRequests),
     timesheet: loadFromStorage('ess_timesheet', mockTimesheet),
     compensations: loadFromStorage('ess_compensations', mockCompensations),
+    salarySlips: loadFromStorage('ess_salary_slips', []),
   }
 }
 
@@ -140,6 +141,16 @@ function reducer(state, action) {
       return { ...state, compensations }
     }
 
+    // Salary Slips
+    case 'ADD_SALARY_SLIP': {
+      const salarySlips = [action.payload, ...state.salarySlips]
+      return { ...state, salarySlips }
+    }
+    case 'DELETE_SALARY_SLIP': {
+      const salarySlips = state.salarySlips.filter(s => s.id !== action.payload)
+      return { ...state, salarySlips }
+    }
+
     // Documents
     case 'ADD_DOCUMENT': {
       const documents = [...state.documents, action.payload]
@@ -211,6 +222,7 @@ const STORAGE_MAP = {
   requests: 'ess_requests',
   timesheet: 'ess_timesheet',
   compensations: 'ess_compensations',
+  salarySlips: 'ess_salary_slips',
 }
 
 export function AppProvider({ children }) {
@@ -218,7 +230,11 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     Object.entries(STORAGE_MAP).forEach(([key, storageKey]) => {
-      localStorage.setItem(storageKey, JSON.stringify(state[key]))
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(state[key]))
+      } catch {
+        // localStorage quota exceeded — skip persistence for this key
+      }
     })
   }, [state])
 

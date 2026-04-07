@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext.jsx'
 
 const SALARY_ROWS = [
@@ -122,6 +122,48 @@ export default function Compensation() {
   const [showVerification, setShowVerification] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ type: 'Performance Bonus', amount: '', date: '', notes: '', currency: 'PKR' })
+  const [slipForm, setSlipForm] = useState({ month: '', year: new Date().getFullYear().toString(), notes: '' })
+  const [slipFileData, setSlipFileData] = useState(null)
+  const [showSlipForm, setShowSlipForm] = useState(false)
+  const [previewSlip, setPreviewSlip] = useState(null)
+  const [slipFileError, setSlipFileError] = useState('')
+  const slipFileRef = useRef(null)
+
+  function handleSlipFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 3 * 1024 * 1024) {
+      setSlipFileError('File is too large (max 3 MB). Please compress or use a smaller file.')
+      e.target.value = ''
+      return
+    }
+    setSlipFileError('')
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setSlipFileData({ base64: ev.target.result, type: file.type, name: file.name, size: file.size })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  function handleSlipSubmit() {
+    if (!slipForm.month || !slipForm.year) return
+    dispatch({
+      type: 'ADD_SALARY_SLIP',
+      payload: {
+        id: Date.now(),
+        month: slipForm.month,
+        year: slipForm.year,
+        notes: slipForm.notes,
+        uploadedAt: new Date().toISOString().split('T')[0],
+        fileBase64: slipFileData?.base64 || null,
+        fileType: slipFileData?.type || null,
+        fileName: slipFileData?.name || null,
+      }
+    })
+    setSlipForm({ month: '', year: new Date().getFullYear().toString(), notes: '' })
+    setSlipFileData(null)
+    setShowSlipForm(false)
+  }
 
   function handleSubmit() {
     if (!form.amount || !form.date) return
@@ -246,6 +288,155 @@ export default function Compensation() {
             </table>
           </div>
         </div>
+
+        {/* Salary Slips */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-tmc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h2 className="text-gray-800 font-semibold">Salary Slips</h2>
+            </div>
+            <button onClick={() => setShowSlipForm(!showSlipForm)} className="btn-primary text-sm">
+              {showSlipForm ? 'Cancel' : '+ Upload Slip'}
+            </button>
+          </div>
+
+          {showSlipForm && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="label-text">Month</label>
+                  <select value={slipForm.month} onChange={e => setSlipForm(f => ({ ...f, month: e.target.value }))} className="input-field">
+                    <option value="">Select month</option>
+                    {['January','February','March','April','May','June','July','August','September','October','November','December'].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label-text">Year</label>
+                  <select value={slipForm.year} onChange={e => setSlipForm(f => ({ ...f, year: e.target.value }))} className="input-field">
+                    {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="label-text">Notes (optional)</label>
+                  <input type="text" value={slipForm.notes} onChange={e => setSlipForm(f => ({ ...f, notes: e.target.value }))} placeholder="e.g. includes bonus" className="input-field" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="label-text">Attach File (PDF or Image)</label>
+                  <div
+                    onClick={() => slipFileRef.current?.click()}
+                    className="mt-1 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-tmc-400 hover:bg-tmc-50 transition-colors"
+                  >
+                    {slipFileData ? (
+                      <>
+                        <svg className="w-8 h-8 text-tmc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p className="text-sm font-medium text-tmc-700">{slipFileData.name}</p>
+                        <p className="text-xs text-gray-400">{(slipFileData.size / 1024).toFixed(1)} KB — click to change</p>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <p className="text-sm text-gray-500">Click to upload salary slip</p>
+                        <p className="text-xs text-gray-400">PDF, PNG, JPG supported</p>
+                      </>
+                    )}
+                  </div>
+                  <input ref={slipFileRef} type="file" accept=".pdf,image/*" className="hidden" onChange={handleSlipFileChange} />
+                  {slipFileError && <p className="text-red-500 text-xs mt-1">{slipFileError}</p>}
+                </div>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button onClick={handleSlipSubmit} disabled={!slipForm.month || !slipForm.year} className="btn-primary disabled:opacity-50">Upload Slip</button>
+                <button onClick={() => { setShowSlipForm(false); setSlipFileData(null); setSlipFileError('') }} className="btn-secondary">Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {state.salarySlips.length === 0 ? (
+            <div className="text-center py-10">
+              <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-sm">No salary slips uploaded yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {state.salarySlips.map(slip => (
+                <div key={slip.id} className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex flex-col gap-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-gray-800 font-semibold text-sm">{slip.month} {slip.year}</p>
+                      {slip.notes && <p className="text-gray-500 text-xs mt-0.5">{slip.notes}</p>}
+                      <p className="text-gray-400 text-xs mt-1">Uploaded {slip.uploadedAt}</p>
+                    </div>
+                    <div className="w-9 h-9 bg-tmc-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-tmc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    {slip.fileBase64 && (
+                      <button onClick={() => setPreviewSlip(slip)} className="flex-1 text-xs bg-white border border-gray-200 hover:border-tmc-400 text-gray-600 hover:text-tmc-600 font-medium py-1.5 rounded-lg transition-colors">
+                        View
+                      </button>
+                    )}
+                    {slip.fileBase64 && (
+                      <a href={slip.fileBase64} download={slip.fileName || `${slip.month}-${slip.year}-slip`} className="flex-1 text-center text-xs bg-white border border-gray-200 hover:border-tmc-400 text-gray-600 hover:text-tmc-600 font-medium py-1.5 rounded-lg transition-colors">
+                        Download
+                      </a>
+                    )}
+                    <button onClick={() => dispatch({ type: 'DELETE_SALARY_SLIP', payload: slip.id })} className="text-xs bg-red-50 border border-red-100 hover:bg-red-100 text-red-500 font-medium px-3 py-1.5 rounded-lg transition-colors">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Slip Preview Modal */}
+        {previewSlip && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setPreviewSlip(null)} />
+            <div className="relative bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl">
+              <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                <div>
+                  <h3 className="text-gray-800 font-semibold">{previewSlip.month} {previewSlip.year} — Salary Slip</h3>
+                  {previewSlip.fileName && <p className="text-gray-500 text-xs">{previewSlip.fileName}</p>}
+                </div>
+                <button onClick={() => setPreviewSlip(null)} className="text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-4">
+                {previewSlip.fileType?.startsWith('image/') ? (
+                  <img src={previewSlip.fileBase64} alt="Salary slip" className="max-w-full mx-auto rounded-xl" />
+                ) : previewSlip.fileType === 'application/pdf' ? (
+                  <iframe src={previewSlip.fileBase64} title="Salary slip" className="w-full h-[60vh] rounded-xl" />
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 text-sm mb-4">Preview not available.</p>
+                    <a href={previewSlip.fileBase64} download={previewSlip.fileName} className="btn-primary inline-block">Download File</a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Compensation Records */}
         {state.compensations.length > 0 && (
