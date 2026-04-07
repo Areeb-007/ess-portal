@@ -2,11 +2,12 @@ import React, { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext.jsx'
 
 const SALARY_ROWS = [
-  { label: 'Basic', amount: null, provident: 'PF', providentStatus: 'Not Enrolled' },
-  { label: 'Conveyance Allowance', amount: null, provident: '', providentStatus: '' },
-  { label: 'House Rent Allowance', amount: null, provident: '', providentStatus: '' },
-  { label: 'Medical Allowance', amount: null, provident: '', providentStatus: '' },
-  { label: 'Utility Allowance', amount: null, provident: '', providentStatus: '' },
+  { label: 'Basic', amount: 115000, provident: 'PF', providentStatus: 'Not Enrolled' },
+  { label: 'House Rent Allowance', amount: 38500, provident: '', providentStatus: '' },
+  { label: 'Utility Allowance', amount: 7300, provident: '', providentStatus: '' },
+  { label: 'Conveyance Allowance', amount: 7200, provident: '', providentStatus: '' },
+  { label: 'Mobile Allowance', amount: 3000, provident: '', providentStatus: '' },
+  { label: 'Internet Allowance', amount: 4000, provident: '', providentStatus: '' },
 ]
 
 function VerificationModal({ onVerified, onClose }) {
@@ -248,7 +249,7 @@ export default function Compensation() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="text-gray-500 text-xs mb-1">Total Monthly Compensation</div>
-              <div className="text-gray-800 font-bold text-lg">PKR {total.toLocaleString() || '—'}</div>
+              <div className="text-gray-800 font-bold text-lg">PKR 175,000</div>
             </div>
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="text-gray-500 text-xs mb-1">Total Records</div>
@@ -275,7 +276,7 @@ export default function Compensation() {
                 {SALARY_ROWS.map((row, i) => (
                   <tr key={i} className="border-b border-gray-50 last:border-0">
                     <td className="py-3 pr-4 text-gray-700 font-medium">{row.label}</td>
-                    <td className="py-3 pr-4 text-gray-500">{row.amount || '—'}</td>
+                    <td className="py-3 pr-4 text-gray-500">{row.amount ? `PKR ${row.amount.toLocaleString()}` : '—'}</td>
                     <td className="py-3 pr-4 text-gray-500">{row.provident}</td>
                     <td className="py-3">
                       {row.providentStatus && (
