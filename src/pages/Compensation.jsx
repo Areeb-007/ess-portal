@@ -2,12 +2,12 @@ import React, { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext.jsx'
 
 const SALARY_BREAKDOWN = [
-  { label: 'Basic', amount: 115000 },
-  { label: 'House Rent', amount: 38500 },
-  { label: 'Utility Allowance', amount: 7300 },
-  { label: 'Conveyance Allowance', amount: 7200 },
-  { label: 'Mobile Allowance', amount: 3000 },
-  { label: 'Internet Allowance', amount: 4000 },
+  { label: 'Basic Salary', amount: 115550 },
+  { label: 'House Rent Allowance', amount: 37800 },
+  { label: 'Utility Allowance', amount: 7750 },
+  { label: 'Conveyance Allowance', amount: 7900 },
+  { label: 'Mobile Allowance', amount: 2500 },
+  { label: 'Internet Allowance', amount: 3500 },
 ]
 
 const HEALTH_WELLNESS = [
@@ -208,22 +208,22 @@ export default function Compensation() {
           <div className="lg:col-span-3 space-y-3">
 
             {/* Dark salary overview card */}
-            <div className="bg-gray-900 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-gray-400 text-sm font-medium">Salary Overview</span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-blue-950 rounded-2xl p-8 flex flex-col justify-between min-h-[230px]">
+              <div className="flex items-center justify-between">
+                <span className="text-blue-300 text-sm font-medium">Salary Overview</span>
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </div>
-              <div className="flex items-end justify-between">
+              <div className="flex items-end justify-between mt-8">
                 <div>
-                  <div className="text-white text-3xl font-bold mb-1">175,000 PKR</div>
-                  <div className="text-gray-400 text-sm">Total Monthly Compensation</div>
+                  <div className="text-white text-4xl font-bold mb-2">175,000 PKR</div>
+                  <div className="text-blue-300 text-sm">Total Monthly Compensation</div>
                 </div>
                 <button
                   onClick={() => setShowSlipSection(s => !s)}
-                  className="bg-white hover:bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex-shrink-0"
+                  className="bg-white hover:bg-gray-100 text-gray-800 text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors flex-shrink-0"
                 >
                   My Salary Slip
                 </button>
@@ -242,77 +242,6 @@ export default function Compensation() {
               ))}
             </div>
 
-            {/* Add Record button + form */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-gray-700 font-semibold text-sm">Compensation Records</h3>
-                <button onClick={() => setShowForm(!showForm)} className="btn-primary text-xs px-3 py-1.5">
-                  {showForm ? 'Cancel' : '+ Add Record'}
-                </button>
-              </div>
-
-              {showForm && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="label-text">Type</label>
-                      <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="input-field">
-                        {['Salary Adjustment','Performance Bonus','Annual Increment','Allowance','Overtime Pay','Commission','Other'].map(t => <option key={t}>{t}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="label-text">Amount (PKR)</label>
-                      <input type="number" min="0" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0" className="input-field" />
-                    </div>
-                    <div>
-                      <label className="label-text">Effective Date</label>
-                      <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="input-field" />
-                    </div>
-                    <div>
-                      <label className="label-text">Notes</label>
-                      <input type="text" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional notes" className="input-field" />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    <button onClick={handleSubmit} className="btn-primary text-sm">Add Record</button>
-                    <button onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
-                  </div>
-                </div>
-              )}
-
-              {state.compensations.length === 0 ? (
-                <p className="text-gray-400 text-xs text-center py-4">No records added yet.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-gray-100">
-                        {['Date','Type','Amount (PKR)','Notes',''].map(h => (
-                          <th key={h} className="text-left text-gray-400 font-medium pb-2 pr-3 uppercase tracking-wider">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...state.compensations].sort((a, b) => b.date.localeCompare(a.date)).map(c => (
-                        <tr key={c.id} className="border-b border-gray-50 last:border-0">
-                          <td className="py-2 pr-3 text-gray-700 font-medium whitespace-nowrap">
-                            {new Date(c.date + 'T00:00:00').toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </td>
-                          <td className="py-2 pr-3">
-                            <span className="bg-tmc-50 text-tmc-700 border border-tmc-200 px-2 py-0.5 rounded-full text-xs font-semibold">{c.type}</span>
-                          </td>
-                          <td className="py-2 pr-3 text-tmc-600 font-semibold">{Number(c.amount).toLocaleString()}</td>
-                          <td className="py-2 pr-3 text-gray-500 max-w-xs">{c.notes || '—'}</td>
-                          <td className="py-2">
-                            <button onClick={() => dispatch({ type: 'DELETE_COMPENSATION', payload: c.id })} className="btn-danger text-xs px-2 py-0.5">Delete</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* RIGHT — Health & Wellness + Leave + PF */}

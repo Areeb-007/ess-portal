@@ -254,7 +254,7 @@ export default function Dashboard() {
               value={newPost.content}
               onChange={e => setNewPost(p => ({ ...p, content: e.target.value }))}
               placeholder="Write Something ...."
-              rows={3}
+              rows={5}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:border-tmc-400 focus:ring-2 focus:ring-tmc-100 resize-none text-sm transition-all"
             />
             <div className="flex items-center justify-between mt-3">
@@ -295,21 +295,6 @@ export default function Dashboard() {
             </div>
           ))}
 
-          {/* Birthday card (demo) */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <div className="flex items-start gap-2">
-              <span className="text-2xl">🎉</span>
-              <div>
-                <h3 className="text-gray-800 font-semibold text-sm">Happy Birthday Hussnain Amjad!</h3>
-                <p className="text-gray-500 text-sm mt-1">Wishing you a happy birthday and a memorable year.</p>
-              </div>
-              <button className="ml-auto text-gray-300 hover:text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Right column - Tasks */}

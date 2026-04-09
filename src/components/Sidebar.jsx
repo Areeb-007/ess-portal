@@ -1,7 +1,6 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext.jsx'
-import logoMain from '../assets/logo_main.jpeg'
 
 const navItems = [
   {
@@ -96,10 +95,9 @@ export default function Sidebar({ isOpen, onClose }) {
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-white/10">
-        <img src={logoMain} alt="TMC ESS" className="h-9 w-auto object-contain flex-shrink-0" />
-        <button onClick={onClose} className="ml-auto lg:hidden text-gray-400 hover:text-white">
+      {/* Close button (mobile only) */}
+      <div className="flex items-center justify-end px-5 py-4 border-b border-white/10 lg:hidden">
+        <button onClick={onClose} className="text-gray-400 hover:text-white">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
