@@ -34,6 +34,16 @@ const navItems = [
     ),
   },
   {
+    path: '/survey',
+    label: 'Survey',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
     path: '/timesheet',
     label: 'Timesheet',
     icon: (
@@ -115,8 +125,8 @@ export default function Sidebar({ isOpen, onClose }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
               ${isActive
-                ? 'bg-white/10 text-tmc-400 border-l-4 border-tmc-400 pl-2'
-                : 'text-gray-400 hover:text-white hover:bg-white/5 border-l-4 border-transparent pl-2'
+                ? 'bg-white/5 text-tmc-400 border border-tmc-500 shadow-sm'
+                : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
               }`
             }
           >

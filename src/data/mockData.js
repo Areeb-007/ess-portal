@@ -25,16 +25,46 @@ export const mockProfile = {
 }
 
 export const mockTasks = [
-  { id: 1, title: 'Finalize Derived Roles to End Users Mapping', confirmed: false },
-  { id: 2, title: 'Retrofit End User Training Workshops & Collect Feedback', confirmed: false },
-  { id: 3, title: 'Conduct End User Training Workshops & Collect Feedback', confirmed: false },
-  { id: 4, title: 'Collect Final Master data', confirmed: false },
-  { id: 5, title: 'Review Final Master Data', confirmed: false },
-  { id: 6, title: 'Load Delta Master Data in PRE/PRD Environment', confirmed: false },
-  { id: 7, title: 'Validate Delta Master Data in PRE/PRD Environment', confirmed: false },
+  { id: 1, title: '5.1.1-Support Successful SAP Run', confirmed: false },
+  { id: 2, title: '5.1.2-Run System Performance Report', confirmed: false },
+  { id: 3, title: 'Finalize Derived Roles to End Users Mapping', confirmed: true },
+  { id: 4, title: 'Retrofit End User Training Material', confirmed: true },
+  { id: 5, title: 'Conduct End User Training Workshops & Collect Feedback', confirmed: true },
+  { id: 6, title: 'Collect Final Master data', confirmed: true },
+  { id: 7, title: 'Review Final Master Data', confirmed: true },
 ]
 
 export const mockAttendance = [
+  {
+    id: 100,
+    date: '2026-05-06',
+    checkIn: null,
+    checkOut: null,
+    status: 'Absent',
+    missingPunchRequested: false,
+    checkInLocation: null,
+    checkOutLocation: null,
+  },
+  {
+    id: 101,
+    date: '2026-05-05',
+    checkIn: '10:05 AM',
+    checkOut: null,
+    status: 'Missing Punch',
+    missingPunchRequested: false,
+    checkInLocation: 'Inside Location',
+    checkOutLocation: null,
+  },
+  {
+    id: 102,
+    date: '2026-05-04',
+    checkIn: '09:50 AM',
+    checkOut: '07:10 PM',
+    status: 'Present',
+    missingPunchRequested: false,
+    checkInLocation: 'Inside Location',
+    checkOutLocation: 'Outside Location',
+  },
   {
     id: 1,
     date: '2026-04-08',

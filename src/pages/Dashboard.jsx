@@ -118,7 +118,7 @@ export default function Dashboard() {
         {/* Left column */}
         <div className="space-y-4">
           {/* Greeting + Check In/Out */}
-          <div className="bg-sidebar rounded-2xl p-5 text-white">
+          <div className="bg-[#1e2d4a] rounded-2xl p-5 text-white">
             <div className="text-xs text-gray-400 mb-1">
               {formatDate(today)}, {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
             </div>
@@ -269,6 +269,43 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Birthday card */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 overflow-hidden relative">
+            <div className="flex items-start gap-3 mb-3">
+              <span className="text-2xl">🎉</span>
+              <div className="flex-1">
+                <h3 className="text-gray-800 font-semibold text-sm">Happy Birthday Bilal Ahmed!</h3>
+                <p className="text-gray-500 text-sm mt-1">Wishing you a great birthday and a memorable year.</p>
+              </div>
+              <button className="text-gray-300 hover:text-gray-500 flex-shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+            </div>
+            {/* Confetti decoration */}
+            <div className="relative h-16 overflow-hidden">
+              {[
+                { color: 'bg-yellow-400', x: '8%',  y: '10%', r: '15deg',  w: 'w-3', h: 'h-1.5' },
+                { color: 'bg-pink-400',   x: '20%', y: '50%', r: '-20deg', w: 'w-2', h: 'h-2' },
+                { color: 'bg-blue-400',   x: '35%', y: '20%', r: '30deg',  w: 'w-4', h: 'h-1' },
+                { color: 'bg-green-400',  x: '50%', y: '60%', r: '-10deg', w: 'w-2', h: 'h-3' },
+                { color: 'bg-purple-400', x: '65%', y: '15%', r: '25deg',  w: 'w-3', h: 'h-1.5' },
+                { color: 'bg-red-400',    x: '75%', y: '55%', r: '-30deg', w: 'w-2', h: 'h-2' },
+                { color: 'bg-yellow-300', x: '85%', y: '25%', r: '10deg',  w: 'w-4', h: 'h-1' },
+                { color: 'bg-blue-300',   x: '92%', y: '65%', r: '-15deg', w: 'w-2', h: 'h-2.5' },
+                { color: 'bg-pink-300',   x: '45%', y: '40%', r: '20deg',  w: 'w-3', h: 'h-1' },
+                { color: 'bg-orange-400', x: '58%', y: '75%', r: '-25deg', w: 'w-2', h: 'h-2' },
+              ].map((c, i) => (
+                <div
+                  key={i}
+                  className={`absolute ${c.color} ${c.w} ${c.h} rounded-sm opacity-80`}
+                  style={{ left: c.x, top: c.y, transform: `rotate(${c.r})` }}
+                />
+              ))}
+            </div>
+          </div>
+
           {/* Posts feed */}
           {state.posts.map(post => (
             <div key={post.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
@@ -339,8 +376,8 @@ export default function Dashboard() {
                   <span className={`flex-1 text-xs leading-relaxed ${task.confirmed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
                     {task.title}
                   </span>
-                  <span className={`text-xs font-semibold flex-shrink-0 ${task.confirmed ? 'text-tmc-500' : 'text-tmc-500'}`}>
-                    Confirmed
+                  <span className={`text-xs font-semibold flex-shrink-0 ${task.confirmed ? 'text-tmc-500' : 'text-amber-500'}`}>
+                    {task.confirmed ? 'Confirmed' : 'In-Progress'}
                   </span>
                 </div>
               ))}

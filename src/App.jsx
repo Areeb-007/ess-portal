@@ -10,6 +10,7 @@ import Timesheet from './pages/Timesheet.jsx'
 import Compensation from './pages/Compensation.jsx'
 import Attendance from './pages/Attendance.jsx'
 import Documents from './pages/Documents.jsx'
+import Survey from './pages/Survey.jsx'
 
 function ProtectedRoute({ children }) {
   const { state } = useApp()
@@ -47,6 +48,7 @@ function AppRoutes() {
         <Route path="requests" element={<Requests />} />
         <Route path="timesheet" element={<Timesheet />} />
         <Route path="compensation" element={<Compensation />} />
+        <Route path="survey" element={<Survey />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="documents" element={<Documents />} />
       </Route>
