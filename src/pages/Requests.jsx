@@ -141,33 +141,86 @@ function MissingPunchFields({ form, setForm, errors }) {
   )
 }
 
+const CLAIM_LIMITS = {
+  'Medical Benefit (OPD)':                  { total: 60501,  remaining: 57773 },
+  'Business Expense on behalf of TMC':       { total: 50000,  remaining: 50000 },
+  'Advance TADA for Local Travel':           { total: 30000,  remaining: 30000 },
+  'Advance TADA for International Travel':   { total: 150000, remaining: 150000 },
+  'Travel Reimbursement':                    { total: 25000,  remaining: 25000 },
+  'Other':                                   { total: 10000,  remaining: 10000 },
+}
+
 function FinancialClaimFields({ form, setForm, errors }) {
+  const limits = form.claimType ? CLAIM_LIMITS[form.claimType] : null
+
+  function handleFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setForm(f => ({ ...f, attachedFileName: '', attachedFileError: 'File must be under 5MB' }))
+      return
+    }
+    setForm(f => ({ ...f, attachedFileName: file.name, attachedFileError: '' }))
+  }
+
   return (
     <>
+      <div>
+        <label className="label-text">Request Category <span className="text-red-500">*</span></label>
+        <select value={form.claimType || ''} onChange={e => setForm(f => ({ ...f, claimType: e.target.value }))} className={fieldClass(errors.claimType)}>
+          <option value="">Select Request Category</option>
+          <option>Medical Benefit (OPD)</option>
+          <option>Business Expense on behalf of TMC</option>
+          <option>Advance TADA for Local Travel</option>
+          <option>Advance TADA for International Travel</option>
+          <option>Travel Reimbursement</option>
+          <option>Other</option>
+        </select>
+        <FieldError msg={errors.claimType} />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-text">Claim Type <span className="text-red-500">*</span></label>
-          <select value={form.claimType || ''} onChange={e => setForm(f => ({ ...f, claimType: e.target.value }))} className={fieldClass(errors.claimType)}>
-            <option value="">Select</option><option>Medical</option><option>Travel</option>
-            <option>Communication</option><option>Equipment</option><option>Other</option>
-          </select>
-          <FieldError msg={errors.claimType} />
-        </div>
-        <div>
-          <label className="label-text">Amount (PKR) <span className="text-red-500">*</span></label>
-          <input type="number" value={form.amount || ''} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0.00" className={fieldClass(errors.amount)} />
-          <FieldError msg={errors.amount} />
-        </div>
-        <div>
-          <label className="label-text">Date of Expense <span className="text-red-500">*</span></label>
+          <label className="label-text">Transaction Date <span className="text-red-500">*</span></label>
           <input type="date" value={form.expenseDate || ''} onChange={e => setForm(f => ({ ...f, expenseDate: e.target.value }))} className={fieldClass(errors.expenseDate)} />
           <FieldError msg={errors.expenseDate} />
         </div>
+        <div>
+          <label className="label-text">Bill Amount (PKR) <span className="text-red-500">*</span></label>
+          <input type="number" value={form.amount || ''} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="Enter Bill Amount" className={fieldClass(errors.amount)} />
+          {limits && (
+            <div className="mt-1.5 space-y-0.5">
+              <p className="text-xs text-gray-500">Total Limit: PKR {limits.total.toLocaleString()}</p>
+              <p className="text-xs text-gray-500">Remaining Balance: {limits.remaining.toLocaleString()}</p>
+            </div>
+          )}
+          <FieldError msg={errors.amount} />
+        </div>
       </div>
+
       <div>
-        <label className="label-text">Description <span className="text-red-500">*</span></label>
-        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Describe the expense..." className={`${fieldClass(errors.reason)} resize-none`} />
+        <label className="label-text">Reason <span className="text-red-500">*</span></label>
+        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={4} placeholder="Enter the reason for financial claim request..." className={`${fieldClass(errors.reason)} resize-none`} />
         <FieldError msg={errors.reason} />
+      </div>
+
+      <div>
+        <label className="label-text">Attached File <span className="text-red-500">*</span></label>
+        <div className="flex gap-2">
+          <div className={`flex-1 px-4 py-2.5 rounded-xl border text-sm ${errors.attachedFileName ? 'border-red-400' : 'border-gray-300'} bg-white text-gray-400 truncate`}>
+            {form.attachedFileName || 'no file selected'}
+          </div>
+          <label className="flex items-center gap-1.5 bg-tmc-500 hover:bg-tmc-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer transition-colors flex-shrink-0">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            ADD FILE
+            <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
+          </label>
+        </div>
+        <p className="text-gray-400 text-xs mt-1">Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 5MB)</p>
+        {form.attachedFileError && <p className="text-red-500 text-xs mt-1">{form.attachedFileError}</p>}
+        <FieldError msg={errors.attachedFileName} />
       </div>
     </>
   )
@@ -228,10 +281,11 @@ function validate(requestType, form) {
     req('punchType', 'Punch type')
     req('reason', 'Reason')
   } else if (requestType === 'Financial Claim') {
-    req('claimType', 'Claim type')
-    req('amount', 'Amount')
-    req('expenseDate', 'Date of expense')
-    req('reason', 'Description')
+    req('claimType', 'Request category')
+    req('expenseDate', 'Transaction date')
+    req('amount', 'Bill amount')
+    req('reason', 'Reason')
+    req('attachedFileName', 'Attached file')
     if (form.amount && Number(form.amount) <= 0) e.amount = 'Amount must be greater than 0'
   } else if (requestType === 'Business Trip') {
     req('destination', 'Destination')
@@ -414,7 +468,9 @@ export default function Requests() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative bg-white rounded-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-gray-800 text-xl font-bold">Create Request</h3>
+              <h3 className="text-gray-800 text-xl font-bold">
+                {requestType === 'Financial Claim' ? 'Financial Claim Request' : 'Create Request'}
+              </h3>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -449,7 +505,9 @@ export default function Requests() {
               {requestType === 'Business Trip' && <BusinessTripFields form={form} setForm={setForm} errors={errors} />}
 
               <div className="flex gap-3 pt-2">
-                <button onClick={submitRequest} className="btn-primary flex-1">Submit Request</button>
+                <button onClick={submitRequest} className="btn-primary flex-1">
+                  {requestType === 'Financial Claim' ? 'Send Request' : 'Submit Request'}
+                </button>
                 <button onClick={() => setShowModal(false)} className="btn-secondary flex-1">Cancel</button>
               </div>
             </div>
