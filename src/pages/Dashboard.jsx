@@ -113,10 +113,10 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
         {/* Left column */}
-        <div className="space-y-4">
+        <div className="lg:col-span-1 space-y-4">
           {/* Greeting + Check In/Out */}
           <div className="bg-[#1e2d4a] rounded-2xl p-5 text-white">
             <div className="text-xs text-gray-400 mb-1">
@@ -217,10 +217,10 @@ export default function Dashboard() {
         </div>
 
         {/* Middle column - Create Post + Posts */}
-        <div className="space-y-4">
+        <div className="lg:col-span-3 space-y-4">
           {/* Create Post */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <h2 className="text-gray-700 font-semibold text-sm mb-3">Create Post</h2>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <h2 className="text-gray-700 font-semibold text-base mb-4">Create Post</h2>
             {/* Tabs */}
             <div className="flex gap-4 border-b border-gray-100 mb-4">
               {['Post', 'Photo/Video', 'Document'].map(tab => (
@@ -254,7 +254,7 @@ export default function Dashboard() {
               value={newPost.content}
               onChange={e => setNewPost(p => ({ ...p, content: e.target.value }))}
               placeholder="Write Something ...."
-              rows={5}
+              rows={8}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:border-tmc-400 focus:ring-2 focus:ring-tmc-100 resize-none text-sm transition-all"
             />
             <div className="flex items-center justify-between mt-3">
@@ -335,7 +335,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right column - Tasks */}
-        <div className="space-y-4">
+        <div className="lg:col-span-1 space-y-4">
           {/* Tasks header tabs */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
             <div className="flex gap-3 mb-4">
