@@ -38,7 +38,7 @@ export default function Layout() {
             </button>
             {/* TMC ESS Logo */}
             <div className="flex items-center">
-              <img src={logoMain} alt="TMC ESS" className="h-9 w-auto object-contain" />
+              <img src={logoMain} alt="TMC ESS" className="h-9 w-auto object-contain mix-blend-multiply" />
             </div>
           </div>
 
