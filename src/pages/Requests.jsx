@@ -1,5 +1,60 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useApp } from '../context/AppContext.jsx'
+
+const CLAIM_CATEGORIES = [
+  'Medical Benefit (OPD)',
+  'Business Expense on behalf of TMC',
+  'Advance TADA for Local Travel',
+  'Advance TADA for International Travel',
+  'Travel Reimbursement',
+  'Other',
+]
+
+function CategoryDropdown({ value, onChange, error }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl border bg-white text-sm transition-all duration-200
+          ${error ? 'border-red-400 focus:ring-red-100' : 'border-gray-300 focus:border-tmc-400 focus:ring-2 focus:ring-tmc-100'}
+          ${value ? 'text-gray-800' : 'text-gray-400'}`}
+      >
+        <span>{value || 'Select Request Category'}</span>
+        <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-y-auto max-h-64">
+          {CLAIM_CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => { onChange(cat); setOpen(false) }}
+              className={`w-full text-left px-5 py-4 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0
+                ${value === cat ? 'bg-tmc-50 text-tmc-700 font-medium' : ''}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const REQUEST_TYPES = ['Leave', 'Remote Work Request', 'Missing Punch', 'Financial Claim', 'Business Trip']
 
@@ -167,15 +222,11 @@ function FinancialClaimFields({ form, setForm, errors }) {
     <>
       <div>
         <label className="label-text">Request Category <span className="text-red-500">*</span></label>
-        <select value={form.claimType || ''} onChange={e => setForm(f => ({ ...f, claimType: e.target.value }))} className={fieldClass(errors.claimType)}>
-          <option value="">Select Request Category</option>
-          <option>Medical Benefit (OPD)</option>
-          <option>Business Expense on behalf of TMC</option>
-          <option>Advance TADA for Local Travel</option>
-          <option>Advance TADA for International Travel</option>
-          <option>Travel Reimbursement</option>
-          <option>Other</option>
-        </select>
+        <CategoryDropdown
+          value={form.claimType || ''}
+          onChange={val => setForm(f => ({ ...f, claimType: val }))}
+          error={errors.claimType}
+        />
         <FieldError msg={errors.claimType} />
       </div>
 
