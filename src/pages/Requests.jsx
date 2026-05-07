@@ -7,7 +7,7 @@ const REQUEST_CARDS = [
   {
     type: 'Leave',
     icon: (
-      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
@@ -16,7 +16,7 @@ const REQUEST_CARDS = [
     type: 'Remote Work Request',
     label: 'Remote Work Request',
     icon: (
-      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
     ),
@@ -24,7 +24,7 @@ const REQUEST_CARDS = [
   {
     type: 'Missing Punch',
     icon: (
-      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
@@ -32,7 +32,7 @@ const REQUEST_CARDS = [
   {
     type: 'Financial Claim',
     icon: (
-      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
@@ -40,32 +40,44 @@ const REQUEST_CARDS = [
   {
     type: 'Business Trip',
     icon: (
-      <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
       </svg>
     ),
   },
 ]
 
-function LeaveFields({ form, setForm }) {
+function FieldError({ msg }) {
+  if (!msg) return null
+  return <p className="text-red-500 text-xs mt-1">{msg}</p>
+}
+
+function fieldClass(error) {
+  return `input-field${error ? ' border-red-400 focus:border-red-400 focus:ring-red-100' : ''}`
+}
+
+function LeaveFields({ form, setForm, errors }) {
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-text">Leave Type</label>
-          <select value={form.leaveType || ''} onChange={e => setForm(f => ({ ...f, leaveType: e.target.value }))} className="input-field">
+          <label className="label-text">Leave Type <span className="text-red-500">*</span></label>
+          <select value={form.leaveType || ''} onChange={e => setForm(f => ({ ...f, leaveType: e.target.value }))} className={fieldClass(errors.leaveType)}>
             <option value="">Select type</option>
             <option>Annual Leave</option><option>Sick Leave</option><option>Casual Leave</option>
             <option>Maternity Leave</option><option>Paternity Leave</option><option>Unpaid Leave</option>
           </select>
+          <FieldError msg={errors.leaveType} />
         </div>
         <div>
-          <label className="label-text">Start Date</label>
-          <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className="input-field" />
+          <label className="label-text">Start Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={fieldClass(errors.startDate)} />
+          <FieldError msg={errors.startDate} />
         </div>
         <div>
-          <label className="label-text">End Date</label>
-          <input type="date" value={form.endDate || ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className="input-field" />
+          <label className="label-text">End Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.endDate || ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={fieldClass(errors.endDate)} />
+          <FieldError msg={errors.endDate} />
         </div>
         <div>
           <label className="label-text">Number of Days</label>
@@ -73,102 +85,117 @@ function LeaveFields({ form, setForm }) {
         </div>
       </div>
       <div>
-        <label className="label-text">Reason</label>
-        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Please state your reason..." className="input-field resize-none" />
+        <label className="label-text">Reason <span className="text-red-500">*</span></label>
+        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Please state your reason..." className={`${fieldClass(errors.reason)} resize-none`} />
+        <FieldError msg={errors.reason} />
       </div>
     </>
   )
 }
 
-function RemoteWorkFields({ form, setForm }) {
+function RemoteWorkFields({ form, setForm, errors }) {
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-text">Start Date</label>
-          <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className="input-field" />
+          <label className="label-text">Start Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={fieldClass(errors.startDate)} />
+          <FieldError msg={errors.startDate} />
         </div>
         <div>
-          <label className="label-text">End Date</label>
-          <input type="date" value={form.endDate || ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className="input-field" />
+          <label className="label-text">End Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.endDate || ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={fieldClass(errors.endDate)} />
+          <FieldError msg={errors.endDate} />
         </div>
       </div>
       <div>
-        <label className="label-text">Reason / Justification</label>
-        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Why are you requesting remote work?" className="input-field resize-none" />
+        <label className="label-text">Reason / Justification <span className="text-red-500">*</span></label>
+        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Why are you requesting remote work?" className={`${fieldClass(errors.reason)} resize-none`} />
+        <FieldError msg={errors.reason} />
       </div>
     </>
   )
 }
 
-function MissingPunchFields({ form, setForm }) {
+function MissingPunchFields({ form, setForm, errors }) {
   return (
     <>
       <div>
-        <label className="label-text">Date</label>
-        <input type="date" value={form.date || ''} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="input-field" />
+        <label className="label-text">Date <span className="text-red-500">*</span></label>
+        <input type="date" value={form.date || ''} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className={fieldClass(errors.date)} />
+        <FieldError msg={errors.date} />
       </div>
       <div>
-        <label className="label-text">Punch Type</label>
-        <select value={form.punchType || ''} onChange={e => setForm(f => ({ ...f, punchType: e.target.value }))} className="input-field">
+        <label className="label-text">Punch Type <span className="text-red-500">*</span></label>
+        <select value={form.punchType || ''} onChange={e => setForm(f => ({ ...f, punchType: e.target.value }))} className={fieldClass(errors.punchType)}>
           <option value="">Select</option><option>Check In</option><option>Check Out</option><option>Both</option>
         </select>
+        <FieldError msg={errors.punchType} />
       </div>
       <div>
-        <label className="label-text">Reason</label>
-        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Reason for missing punch..." className="input-field resize-none" />
+        <label className="label-text">Reason <span className="text-red-500">*</span></label>
+        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Reason for missing punch..." className={`${fieldClass(errors.reason)} resize-none`} />
+        <FieldError msg={errors.reason} />
       </div>
     </>
   )
 }
 
-function FinancialClaimFields({ form, setForm }) {
+function FinancialClaimFields({ form, setForm, errors }) {
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-text">Claim Type</label>
-          <select value={form.claimType || ''} onChange={e => setForm(f => ({ ...f, claimType: e.target.value }))} className="input-field">
+          <label className="label-text">Claim Type <span className="text-red-500">*</span></label>
+          <select value={form.claimType || ''} onChange={e => setForm(f => ({ ...f, claimType: e.target.value }))} className={fieldClass(errors.claimType)}>
             <option value="">Select</option><option>Medical</option><option>Travel</option>
             <option>Communication</option><option>Equipment</option><option>Other</option>
           </select>
+          <FieldError msg={errors.claimType} />
         </div>
         <div>
-          <label className="label-text">Amount (PKR)</label>
-          <input type="number" value={form.amount || ''} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0.00" className="input-field" />
+          <label className="label-text">Amount (PKR) <span className="text-red-500">*</span></label>
+          <input type="number" value={form.amount || ''} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0.00" className={fieldClass(errors.amount)} />
+          <FieldError msg={errors.amount} />
         </div>
         <div>
-          <label className="label-text">Date of Expense</label>
-          <input type="date" value={form.expenseDate || ''} onChange={e => setForm(f => ({ ...f, expenseDate: e.target.value }))} className="input-field" />
+          <label className="label-text">Date of Expense <span className="text-red-500">*</span></label>
+          <input type="date" value={form.expenseDate || ''} onChange={e => setForm(f => ({ ...f, expenseDate: e.target.value }))} className={fieldClass(errors.expenseDate)} />
+          <FieldError msg={errors.expenseDate} />
         </div>
       </div>
       <div>
-        <label className="label-text">Description</label>
-        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Describe the expense..." className="input-field resize-none" />
+        <label className="label-text">Description <span className="text-red-500">*</span></label>
+        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Describe the expense..." className={`${fieldClass(errors.reason)} resize-none`} />
+        <FieldError msg={errors.reason} />
       </div>
     </>
   )
 }
 
-function BusinessTripFields({ form, setForm }) {
+function BusinessTripFields({ form, setForm, errors }) {
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-text">Destination</label>
-          <input type="text" value={form.destination || ''} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} placeholder="City / Country" className="input-field" />
+          <label className="label-text">Destination <span className="text-red-500">*</span></label>
+          <input type="text" value={form.destination || ''} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} placeholder="City / Country" className={fieldClass(errors.destination)} />
+          <FieldError msg={errors.destination} />
         </div>
         <div>
-          <label className="label-text">Purpose</label>
-          <input type="text" value={form.purpose || ''} onChange={e => setForm(f => ({ ...f, purpose: e.target.value }))} placeholder="Meeting, Conference, Training..." className="input-field" />
+          <label className="label-text">Purpose <span className="text-red-500">*</span></label>
+          <input type="text" value={form.purpose || ''} onChange={e => setForm(f => ({ ...f, purpose: e.target.value }))} placeholder="Meeting, Conference, Training..." className={fieldClass(errors.purpose)} />
+          <FieldError msg={errors.purpose} />
         </div>
         <div>
-          <label className="label-text">Departure Date</label>
-          <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className="input-field" />
+          <label className="label-text">Departure Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={fieldClass(errors.startDate)} />
+          <FieldError msg={errors.startDate} />
         </div>
         <div>
-          <label className="label-text">Return Date</label>
-          <input type="date" value={form.endDate || ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className="input-field" />
+          <label className="label-text">Return Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.endDate || ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={fieldClass(errors.endDate)} />
+          <FieldError msg={errors.endDate} />
         </div>
       </div>
       <div>
@@ -179,20 +206,65 @@ function BusinessTripFields({ form, setForm }) {
   )
 }
 
+function validate(requestType, form) {
+  const e = {}
+  const req = (field, label) => { if (!form[field]?.toString().trim()) e[field] = `${label} is required` }
+
+  if (requestType === 'Leave') {
+    req('leaveType', 'Leave type')
+    req('startDate', 'Start date')
+    req('endDate', 'End date')
+    req('reason', 'Reason')
+    if (form.startDate && form.endDate && form.endDate < form.startDate)
+      e.endDate = 'End date must be after start date'
+  } else if (requestType === 'Remote Work Request') {
+    req('startDate', 'Start date')
+    req('endDate', 'End date')
+    req('reason', 'Reason')
+    if (form.startDate && form.endDate && form.endDate < form.startDate)
+      e.endDate = 'End date must be after start date'
+  } else if (requestType === 'Missing Punch') {
+    req('date', 'Date')
+    req('punchType', 'Punch type')
+    req('reason', 'Reason')
+  } else if (requestType === 'Financial Claim') {
+    req('claimType', 'Claim type')
+    req('amount', 'Amount')
+    req('expenseDate', 'Date of expense')
+    req('reason', 'Description')
+    if (form.amount && Number(form.amount) <= 0) e.amount = 'Amount must be greater than 0'
+  } else if (requestType === 'Business Trip') {
+    req('destination', 'Destination')
+    req('purpose', 'Purpose')
+    req('startDate', 'Departure date')
+    req('endDate', 'Return date')
+    if (form.startDate && form.endDate && form.endDate < form.startDate)
+      e.endDate = 'Return date must be after departure date'
+  }
+  return e
+}
+
 export default function Requests() {
   const { state, dispatch } = useApp()
   const [showModal, setShowModal] = useState(false)
   const [requestType, setRequestType] = useState('Leave')
   const [form, setForm] = useState({})
+  const [errors, setErrors] = useState({})
   const [searchQuery, setSearchQuery] = useState('')
 
   function openModal(type) {
     setForm({})
+    setErrors({})
     setRequestType(type || 'Leave')
     setShowModal(true)
   }
 
   function submitRequest() {
+    const errs = validate(requestType, form)
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      return
+    }
     dispatch({
       type: 'ADD_REQUEST',
       payload: {
@@ -230,16 +302,18 @@ export default function Requests() {
       {/* Create New Requests */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <h2 className="text-gray-800 font-semibold mb-4">Create New Requests</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {REQUEST_CARDS.map(card => (
             <button
               key={card.type}
               onClick={() => openModal(card.type)}
-              className="relative flex flex-col items-center justify-center gap-2 p-4 border border-gray-200 rounded-xl hover:border-tmc-300 hover:bg-tmc-50 transition-all group"
+              className="relative flex flex-col items-center justify-center gap-3 py-7 px-4 border border-gray-200 rounded-xl hover:border-tmc-400 hover:bg-tmc-50 hover:-translate-y-2 hover:shadow-lg transition-all duration-200 group"
             >
-              <span className="absolute -top-2 -right-2 w-5 h-5 bg-tmc-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow">+</span>
-              {card.icon}
-              <span className="text-gray-600 text-xs font-medium text-center group-hover:text-tmc-700">
+              <span className="absolute -top-2.5 -right-2.5 w-6 h-6 bg-tmc-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow">+</span>
+              <span className="text-gray-400 group-hover:text-tmc-500 transition-colors">
+                {card.icon}
+              </span>
+              <span className="text-gray-600 text-xs font-medium text-center group-hover:text-tmc-700 leading-tight">
                 {card.label || card.type}
               </span>
             </button>
@@ -288,8 +362,8 @@ export default function Requests() {
                   <tr key={req.id} className="border-b border-gray-50 last:border-0">
                     <td className="py-4 pr-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-8 h-8 bg-tmc-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-tmc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
@@ -355,7 +429,7 @@ export default function Requests() {
                   {REQUEST_TYPES.map(t => (
                     <button
                       key={t}
-                      onClick={() => { setRequestType(t); setForm({}) }}
+                      onClick={() => { setRequestType(t); setForm({}); setErrors({}) }}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
                         requestType === t
                           ? 'bg-tmc-500 border-tmc-500 text-white'
@@ -368,11 +442,11 @@ export default function Requests() {
                 </div>
               </div>
 
-              {requestType === 'Leave' && <LeaveFields form={form} setForm={setForm} />}
-              {requestType === 'Remote Work Request' && <RemoteWorkFields form={form} setForm={setForm} />}
-              {requestType === 'Missing Punch' && <MissingPunchFields form={form} setForm={setForm} />}
-              {requestType === 'Financial Claim' && <FinancialClaimFields form={form} setForm={setForm} />}
-              {requestType === 'Business Trip' && <BusinessTripFields form={form} setForm={setForm} />}
+              {requestType === 'Leave' && <LeaveFields form={form} setForm={setForm} errors={errors} />}
+              {requestType === 'Remote Work Request' && <RemoteWorkFields form={form} setForm={setForm} errors={errors} />}
+              {requestType === 'Missing Punch' && <MissingPunchFields form={form} setForm={setForm} errors={errors} />}
+              {requestType === 'Financial Claim' && <FinancialClaimFields form={form} setForm={setForm} errors={errors} />}
+              {requestType === 'Business Trip' && <BusinessTripFields form={form} setForm={setForm} errors={errors} />}
 
               <div className="flex gap-3 pt-2">
                 <button onClick={submitRequest} className="btn-primary flex-1">Submit Request</button>

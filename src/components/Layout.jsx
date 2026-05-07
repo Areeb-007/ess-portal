@@ -62,8 +62,8 @@ export default function Layout() {
 
             {/* User dropdown */}
             <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
-              <div className="w-8 h-8 rounded-full bg-tmc-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-xs font-bold">{initials}</span>
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-amber-800 text-xs font-bold">{initials}</span>
               </div>
               <span className="text-sm font-medium text-gray-700 hidden sm:block">{state.profile.name}</span>
               <svg className="w-4 h-4 text-gray-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
