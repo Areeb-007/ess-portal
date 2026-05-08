@@ -39,7 +39,7 @@ function VerificationModal({ onVerified, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+      <div className="relative bg-white rounded-2xl w-full max-w-xl p-8 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-gray-800 font-bold text-lg">Enter Verification Code</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">

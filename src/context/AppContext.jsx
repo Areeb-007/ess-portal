@@ -108,6 +108,17 @@ function reducer(state, action) {
       const attendance = state.attendance.filter(a => a.id !== action.payload)
       return { ...state, attendance }
     }
+    case 'IMPORT_ATTENDANCE': {
+      const incoming = action.payload
+      const merged = [...state.attendance]
+      incoming.forEach(record => {
+        const idx = merged.findIndex(a => a.date === record.date)
+        if (idx !== -1) merged[idx] = { ...merged[idx], ...record }
+        else merged.push(record)
+      })
+      merged.sort((a, b) => b.date.localeCompare(a.date))
+      return { ...state, attendance: merged }
+    }
     case 'MARK_MISSING_PUNCH': {
       const attendance = state.attendance.map(a =>
         a.date === action.payload ? { ...a, missingPunchRequested: true } : a
