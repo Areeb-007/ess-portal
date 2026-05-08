@@ -10,7 +10,9 @@ const CLAIM_CATEGORIES = [
   'Other',
 ]
 
-function CategoryDropdown({ value, onChange, error }) {
+const PUNCH_TYPES = ['Check In', 'Check Out']
+
+function CustomDropdown({ options, value, onChange, placeholder, error, disabled }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -26,28 +28,32 @@ function CategoryDropdown({ value, onChange, error }) {
     <div className="relative" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen(o => !o)}
+        disabled={disabled}
+        onClick={() => !disabled && setOpen(o => !o)}
         className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl border bg-white text-sm transition-all duration-200
-          ${error ? 'border-red-400 focus:ring-red-100' : 'border-gray-300 focus:border-tmc-400 focus:ring-2 focus:ring-tmc-100'}
-          ${value ? 'text-gray-800' : 'text-gray-400'}`}
+          ${error ? 'border-red-400' : open ? 'border-tmc-400 ring-2 ring-tmc-100' : 'border-gray-300'}
+          ${value ? 'text-gray-800' : 'text-gray-400'}
+          ${disabled ? 'bg-gray-50 cursor-default' : 'cursor-pointer'}`}
       >
-        <span>{value || 'Select Request Category'}</span>
-        <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <span>{value || placeholder}</span>
+        {!disabled && (
+          <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
       </button>
 
       {open && (
         <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-y-auto max-h-64">
-          {CLAIM_CATEGORIES.map(cat => (
+          {options.map(opt => (
             <button
-              key={cat}
+              key={opt}
               type="button"
-              onClick={() => { onChange(cat); setOpen(false) }}
+              onClick={() => { onChange(opt); setOpen(false) }}
               className={`w-full text-left px-5 py-4 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0
-                ${value === cat ? 'bg-tmc-50 text-tmc-700 font-medium' : ''}`}
+                ${value === opt ? 'bg-tmc-50 text-tmc-700 font-medium' : ''}`}
             >
-              {cat}
+              {opt}
             </button>
           ))}
         </div>
@@ -173,24 +179,77 @@ function RemoteWorkFields({ form, setForm, errors }) {
 }
 
 function MissingPunchFields({ form, setForm, errors }) {
+  function handleFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setForm(f => ({ ...f, attachedFileName: '', attachedFileError: 'File must be under 5MB' }))
+      return
+    }
+    setForm(f => ({ ...f, attachedFileName: file.name, attachedFileError: '' }))
+  }
+
   return (
     <>
-      <div>
-        <label className="label-text">Date <span className="text-red-500">*</span></label>
-        <input type="date" value={form.date || ''} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className={fieldClass(errors.date)} />
-        <FieldError msg={errors.date} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="label-text">Function <span className="text-red-500">*</span></label>
+          <CustomDropdown
+            options={['Attendance']}
+            value="Attendance"
+            onChange={() => {}}
+            placeholder="Attendance"
+            disabled
+          />
+        </div>
+        <div>
+          <label className="label-text">Punch Type <span className="text-red-500">*</span></label>
+          <CustomDropdown
+            options={PUNCH_TYPES}
+            value={form.punchType || ''}
+            onChange={val => setForm(f => ({ ...f, punchType: val }))}
+            placeholder="Select"
+            error={errors.punchType}
+          />
+          <FieldError msg={errors.punchType} />
+        </div>
       </div>
-      <div>
-        <label className="label-text">Punch Type <span className="text-red-500">*</span></label>
-        <select value={form.punchType || ''} onChange={e => setForm(f => ({ ...f, punchType: e.target.value }))} className={fieldClass(errors.punchType)}>
-          <option value="">Select</option><option>Check In</option><option>Check Out</option><option>Both</option>
-        </select>
-        <FieldError msg={errors.punchType} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="label-text">Date <span className="text-red-500">*</span></label>
+          <input type="date" value={form.date || ''} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className={fieldClass(errors.date)} />
+          <FieldError msg={errors.date} />
+        </div>
+        <div>
+          <label className="label-text">Punch Time <span className="text-red-500">*</span></label>
+          <input type="time" value={form.punchTime || ''} onChange={e => setForm(f => ({ ...f, punchTime: e.target.value }))} className={fieldClass(errors.punchTime)} />
+          <FieldError msg={errors.punchTime} />
+        </div>
       </div>
+
       <div>
         <label className="label-text">Reason <span className="text-red-500">*</span></label>
-        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Reason for missing punch..." className={`${fieldClass(errors.reason)} resize-none`} />
+        <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={4} placeholder="Enter the reason for missing punch..." className={`${fieldClass(errors.reason)} resize-none`} />
         <FieldError msg={errors.reason} />
+      </div>
+
+      <div>
+        <label className="label-text">Attached File <span className="text-gray-400 font-normal">(Optional)</span></label>
+        <div className="flex gap-2">
+          <div className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-sm text-gray-400 truncate">
+            {form.attachedFileName || 'no file selected'}
+          </div>
+          <label className="flex items-center gap-1.5 bg-tmc-500 hover:bg-tmc-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer transition-colors flex-shrink-0">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            ADD FILE
+            <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
+          </label>
+        </div>
+        <p className="text-gray-400 text-xs mt-1">Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 5MB)</p>
+        {form.attachedFileError && <p className="text-red-500 text-xs mt-1">{form.attachedFileError}</p>}
       </div>
     </>
   )
@@ -222,9 +281,11 @@ function FinancialClaimFields({ form, setForm, errors }) {
     <>
       <div>
         <label className="label-text">Request Category <span className="text-red-500">*</span></label>
-        <CategoryDropdown
+        <CustomDropdown
+          options={CLAIM_CATEGORIES}
           value={form.claimType || ''}
           onChange={val => setForm(f => ({ ...f, claimType: val }))}
+          placeholder="Select Request Category"
           error={errors.claimType}
         />
         <FieldError msg={errors.claimType} />
@@ -328,8 +389,9 @@ function validate(requestType, form) {
     if (form.startDate && form.endDate && form.endDate < form.startDate)
       e.endDate = 'End date must be after start date'
   } else if (requestType === 'Missing Punch') {
-    req('date', 'Date')
     req('punchType', 'Punch type')
+    req('date', 'Date')
+    req('punchTime', 'Punch time')
     req('reason', 'Reason')
   } else if (requestType === 'Financial Claim') {
     req('claimType', 'Request category')
@@ -520,7 +582,9 @@ export default function Requests() {
           <div className="relative bg-white rounded-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-gray-800 text-xl font-bold">
-                {requestType === 'Financial Claim' ? 'Financial Claim Request' : 'Create Request'}
+                {requestType === 'Financial Claim' ? 'Financial Claim Request'
+                  : requestType === 'Missing Punch' ? 'Missing Punch Request'
+                  : 'Create Request'}
               </h3>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -557,7 +621,7 @@ export default function Requests() {
 
               <div className="flex gap-3 pt-2">
                 <button onClick={submitRequest} className="btn-primary flex-1">
-                  {requestType === 'Financial Claim' ? 'Send Request' : 'Submit Request'}
+                  {requestType === 'Financial Claim' || requestType === 'Missing Punch' ? 'Send Request' : 'Submit Request'}
                 </button>
                 <button onClick={() => setShowModal(false)} className="btn-secondary flex-1">Cancel</button>
               </div>
