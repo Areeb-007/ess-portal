@@ -102,94 +102,82 @@ export default function Documents() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center justify-between">
-        <h1 className="text-gray-800 font-bold text-lg">Document Center</h1>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-tmc-400 w-48"
-            />
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="w-8 h-8 bg-tmc-500 hover:bg-tmc-600 text-white rounded-full flex items-center justify-center text-lg font-bold transition-colors shadow-sm"
-            title="Add Document"
-          >
-            +
-          </button>
-        </div>
-      </div>
 
-      {/* Upload form */}
-      {showForm && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-          <h2 className="text-gray-800 font-semibold mb-4">Add Document</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="label-text">Category *</label>
-              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field">
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="label-text">Title *</label>
-              <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Document title" className="input-field" />
-            </div>
-            <div>
-              <label className="label-text">Date Uploaded</label>
-              <input type="date" value={form.dateUploaded} onChange={e => setForm(f => ({ ...f, dateUploaded: e.target.value }))} className="input-field" />
-            </div>
-            <div>
-              <label className="label-text">Attachment (optional)</label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-tmc-50 file:text-tmc-700 hover:file:bg-tmc-100 cursor-pointer"
-              />
-              {fileData && (
-                <p className="text-tmc-600 text-xs mt-1">✓ {fileData.name}</p>
-              )}
-            </div>
-            <div className="sm:col-span-2">
-              <label className="label-text">Description</label>
-              <textarea
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Brief description of the document..."
-                rows={2}
-                className="input-field resize-none"
-              />
-            </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button onClick={handleSubmit} className="btn-primary">Add Document</button>
-            <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setFileData(null) }} className="btn-secondary">Cancel</button>
-          </div>
-        </div>
-      )}
-
-      {/* Tab bar */}
+      {/* Main card */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 pt-4 border-b border-gray-100">
-          <button className="text-sm font-medium text-tmc-600 border-b-2 border-tmc-500 pb-3 px-1">
-            Company Documents
-          </button>
+
+        {/* Tab bar + actions */}
+        <div className="flex items-center justify-between px-6 pt-4 border-b border-gray-100">
+          <div className="flex items-center gap-6">
+            <button className="text-sm font-semibold text-tmc-600 border-b-2 border-tmc-500 pb-3 px-1">
+              Company Documents
+            </button>
+          </div>
+          <div className="flex items-center gap-3 pb-3">
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search documents..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="border border-gray-200 rounded-lg pl-9 pr-4 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-tmc-400 focus:ring-2 focus:ring-tmc-100 w-52"
+              />
+            </div>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-1.5 bg-tmc-500 hover:bg-tmc-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Document
+            </button>
+          </div>
         </div>
 
-        {/* Count */}
-        <div className="px-6 py-3 text-gray-500 text-xs border-b border-gray-50">
-          Showing {filtered.length} of {state.documents.length} documents
-        </div>
+        {/* Upload form */}
+        {showForm && (
+          <div className="px-6 py-5 border-b border-gray-100 bg-gray-50">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label-text">Category *</label>
+                <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field">
+                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label-text">Title *</label>
+                <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Document title" className="input-field" />
+              </div>
+              <div>
+                <label className="label-text">Date Uploaded</label>
+                <input type="date" value={form.dateUploaded} onChange={e => setForm(f => ({ ...f, dateUploaded: e.target.value }))} className="input-field" />
+              </div>
+              <div>
+                <label className="label-text">Attachment (optional)</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-tmc-50 file:text-tmc-700 hover:file:bg-tmc-100 cursor-pointer"
+                />
+                {fileData && <p className="text-tmc-600 text-xs mt-1">✓ {fileData.name}</p>}
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label-text">Description</label>
+                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description..." rows={2} className="input-field resize-none" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={handleSubmit} className="btn-primary">Add Document</button>
+              <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setFileData(null) }} className="btn-secondary">Cancel</button>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         {filtered.length === 0 ? (
@@ -202,7 +190,7 @@ export default function Documents() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b border-gray-100">
+              <thead className="border-b border-gray-100 bg-gray-50">
                 <tr>
                   <th className="text-left text-gray-500 font-medium px-6 py-3 text-xs uppercase tracking-wider">Document Category</th>
                   <th className="text-left text-gray-500 font-medium px-4 py-3 text-xs uppercase tracking-wider">Title</th>
@@ -214,65 +202,49 @@ export default function Documents() {
               <tbody>
                 {filtered.map(doc => (
                   <tr key={doc.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-3">
-                      <div className="flex items-center gap-2">
-                        {/* Red PDF-style icon */}
-                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8 16v-1h8v1H8zm0-3v-1h8v1H8zm0-3V9h5v1H8z"/>
+                    <td className="px-6 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-red-100 rounded-md flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5z"/>
                           </svg>
                         </div>
                         <span className="text-gray-600 text-xs font-medium">{doc.category}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => setPreviewDoc(doc)}
-                        className="text-tmc-600 hover:text-tmc-700 font-medium hover:underline text-left"
-                      >
+                    <td className="px-4 py-3.5">
+                      <button onClick={() => setPreviewDoc(doc)} className="text-tmc-600 hover:text-tmc-700 font-medium hover:underline text-left text-sm">
                         {doc.title}
                       </button>
-                      {doc.fileName && (
-                        <div className="text-gray-400 text-xs">{doc.fileName}</div>
-                      )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap text-sm">
                       {doc.dateUploaded
                         ? new Date(doc.dateUploaded + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 max-w-xs">
+                    <td className="px-4 py-3.5 text-gray-500 max-w-xs text-sm">
                       <span className="line-clamp-2">{doc.description || '—'}</span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setPreviewDoc(doc)}
-                          className="p-1.5 text-gray-400 hover:text-tmc-600 transition-colors"
-                          title="View"
-                        >
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => setPreviewDoc(doc)} className="p-1.5 text-gray-400 hover:text-tmc-600 transition-colors rounded-lg hover:bg-tmc-50" title="View">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         </button>
-                        {doc.fileBase64 && (
-                          <a
-                            href={doc.fileBase64}
-                            download={doc.fileName || doc.title}
-                            className="p-1.5 text-gray-400 hover:text-tmc-600 transition-colors"
-                            title="Download"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                          </a>
-                        )}
-                        <button
-                          onClick={() => dispatch({ type: 'DELETE_DOCUMENT', payload: doc.id })}
-                          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                          title="Delete"
+                        <a
+                          href={doc.fileBase64 || '#'}
+                          download={doc.fileBase64 ? (doc.fileName || doc.title) : undefined}
+                          onClick={!doc.fileBase64 ? e => e.preventDefault() : undefined}
+                          className={`p-1.5 rounded-lg transition-colors ${doc.fileBase64 ? 'text-gray-400 hover:text-tmc-600 hover:bg-tmc-50' : 'text-gray-200 cursor-not-allowed'}`}
+                          title="Download"
                         >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </a>
+                        <button onClick={() => dispatch({ type: 'DELETE_DOCUMENT', payload: doc.id })} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors rounded-lg" title="Delete">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
@@ -285,6 +257,11 @@ export default function Documents() {
             </table>
           </div>
         )}
+
+        {/* Footer count */}
+        <div className="px-6 py-3 border-t border-gray-100 text-gray-400 text-xs">
+          Showing {filtered.length} of {state.documents.length} documents
+        </div>
       </div>
 
       <FilePreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />
