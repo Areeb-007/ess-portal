@@ -117,19 +117,41 @@ function fieldClass(error) {
   return `input-field${error ? ' border-red-400 focus:border-red-400 focus:ring-red-100' : ''}`
 }
 
+const LEAVE_TYPES = [
+  'Annual Leave',
+  'Sick Leave',
+  'Hajj Leave',
+  'Unpaid Leave',
+  'Casual Leave',
+  'Half Day Leave',
+]
+
 function LeaveFields({ form, setForm, errors }) {
+  function handleFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setForm(f => ({ ...f, attachedFileName: '', attachedFileError: 'File must be under 5MB' }))
+      return
+    }
+    setForm(f => ({ ...f, attachedFileName: file.name, attachedFileError: '' }))
+  }
+
   return (
     <>
+      <div>
+        <label className="label-text">Leave Type <span className="text-red-500">*</span></label>
+        <CustomDropdown
+          options={LEAVE_TYPES}
+          value={form.leaveType || ''}
+          onChange={val => setForm(f => ({ ...f, leaveType: val }))}
+          placeholder="Select leave type"
+          error={errors.leaveType}
+        />
+        <FieldError msg={errors.leaveType} />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="label-text">Leave Type <span className="text-red-500">*</span></label>
-          <select value={form.leaveType || ''} onChange={e => setForm(f => ({ ...f, leaveType: e.target.value }))} className={fieldClass(errors.leaveType)}>
-            <option value="">Select type</option>
-            <option>Annual Leave</option><option>Sick Leave</option><option>Casual Leave</option>
-            <option>Maternity Leave</option><option>Paternity Leave</option><option>Unpaid Leave</option>
-          </select>
-          <FieldError msg={errors.leaveType} />
-        </div>
         <div>
           <label className="label-text">Start Date <span className="text-red-500">*</span></label>
           <input type="date" value={form.startDate || ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={fieldClass(errors.startDate)} />
@@ -145,10 +167,29 @@ function LeaveFields({ form, setForm, errors }) {
           <input type="number" min="1" value={form.days || ''} onChange={e => setForm(f => ({ ...f, days: e.target.value }))} placeholder="0" className="input-field" />
         </div>
       </div>
+
       <div>
         <label className="label-text">Reason <span className="text-red-500">*</span></label>
         <textarea value={form.reason || ''} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={3} placeholder="Please state your reason..." className={`${fieldClass(errors.reason)} resize-none`} />
         <FieldError msg={errors.reason} />
+      </div>
+
+      <div>
+        <label className="label-text">Attached File <span className="text-gray-400 font-normal">(Optional)</span></label>
+        <div className="flex gap-2">
+          <div className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-sm text-gray-400 truncate">
+            {form.attachedFileName || 'no file selected'}
+          </div>
+          <label className="flex items-center gap-1.5 bg-tmc-500 hover:bg-tmc-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer transition-colors flex-shrink-0">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            ADD FILE
+            <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={handleFileChange} className="hidden" />
+          </label>
+        </div>
+        <p className="text-gray-400 text-xs mt-1">Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 5MB)</p>
+        {form.attachedFileError && <p className="text-red-500 text-xs mt-1">{form.attachedFileError}</p>}
       </div>
     </>
   )
@@ -559,15 +600,26 @@ export default function Requests() {
                     <td className="py-4">
                       <div className="flex items-center gap-2">
                         {req.status === 'Pending' && (
-                          <button
-                            onClick={() => dispatch({ type: 'UPDATE_REQUEST_STATUS', payload: { id: req.id, status: 'Approved' } })}
-                            className="flex items-center gap-1.5 bg-tmc-50 hover:bg-tmc-100 border border-tmc-200 text-tmc-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                          >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            Approve
-                          </button>
+                          <>
+                            <button
+                              onClick={() => dispatch({ type: 'UPDATE_REQUEST_STATUS', payload: { id: req.id, status: 'Approved' } })}
+                              className="flex items-center gap-1.5 bg-tmc-50 hover:bg-tmc-100 border border-tmc-200 text-tmc-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => dispatch({ type: 'UPDATE_REQUEST_STATUS', payload: { id: req.id, status: 'Rejected' } })}
+                              className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              Reject
+                            </button>
+                          </>
                         )}
                         <button
                           onClick={() => dispatch({ type: 'DELETE_REQUEST', payload: req.id })}
@@ -594,7 +646,8 @@ export default function Requests() {
           <div className="relative bg-white rounded-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-gray-800 text-xl font-bold">
-                {requestType === 'Financial Claim' ? 'Financial Claim Request'
+                {requestType === 'Leave' ? 'Leave Request'
+                  : requestType === 'Financial Claim' ? 'Financial Claim Request'
                   : requestType === 'Missing Punch' ? 'Missing Punch Request'
                   : 'Create Request'}
               </h3>
@@ -633,7 +686,7 @@ export default function Requests() {
 
               <div className="flex gap-3 pt-2">
                 <button onClick={submitRequest} className="btn-primary flex-1">
-                  {requestType === 'Financial Claim' || requestType === 'Missing Punch' ? 'Send Request' : 'Submit Request'}
+                  {['Leave', 'Financial Claim', 'Missing Punch'].includes(requestType) ? 'Send Request' : 'Submit Request'}
                 </button>
                 <button onClick={() => setShowModal(false)} className="btn-secondary flex-1">Cancel</button>
               </div>
