@@ -557,15 +557,27 @@ export default function Requests() {
                       </span>
                     </td>
                     <td className="py-4">
-                      <button
-                        onClick={() => dispatch({ type: 'DELETE_REQUEST', payload: req.id })}
-                        className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        Cancel
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {req.status === 'Pending' && (
+                          <button
+                            onClick={() => dispatch({ type: 'UPDATE_REQUEST_STATUS', payload: { id: req.id, status: 'Approved' } })}
+                            className="flex items-center gap-1.5 bg-tmc-50 hover:bg-tmc-100 border border-tmc-200 text-tmc-700 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Approve
+                          </button>
+                        )}
+                        <button
+                          onClick={() => dispatch({ type: 'DELETE_REQUEST', payload: req.id })}
+                          className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
