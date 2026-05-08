@@ -31,7 +31,7 @@ function VerificationModal({ onVerified, onClose }) {
 
   function handleVerify() {
     if (!code.trim()) { setError('Please enter the verification code.'); return }
-    if (code !== '654755') { setError('Invalid verification code. Please try again.'); return }
+    if (code !== '123456') { setError('Invalid verification code. Please try again.'); return }
     setLoading(true)
     setTimeout(() => { setLoading(false); onVerified() }, 600)
   }
@@ -91,7 +91,6 @@ function VerificationModal({ onVerified, onClose }) {
             className="input-field tracking-widest text-center text-lg font-mono"
           />
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-          <p className="text-gray-400 text-xs mt-1">Demo code: 654755</p>
         </div>
 
         <button
