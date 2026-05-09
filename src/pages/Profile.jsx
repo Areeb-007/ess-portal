@@ -42,8 +42,8 @@ export default function Profile() {
       {/* Left card: avatar + quick info */}
       <div className="w-56 flex-shrink-0">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-3">
-            <span className="text-amber-800 text-2xl font-bold">{initials}</span>
+          <div className="w-20 h-20 rounded-full bg-tmc-500 flex items-center justify-center mb-3">
+            <span className="text-white text-2xl font-bold">{initials}</span>
           </div>
           <h2 className="text-gray-800 font-bold text-base">{profile.name}</h2>
           <p className="text-tmc-500 text-sm font-medium mt-0.5">{profile.designation}</p>

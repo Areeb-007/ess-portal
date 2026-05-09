@@ -129,14 +129,7 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-4">
-              {!todayRecord?.checkIn ? (
-                <button
-                  onClick={handleCheckIn}
-                  className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-lg transition-colors text-sm"
-                >
-                  Check In
-                </button>
-              ) : !todayRecord?.checkOut ? (
+              {todayRecord?.checkIn && !todayRecord?.checkOut ? (
                 <button
                   onClick={handleCheckOut}
                   className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-lg transition-colors text-sm"
@@ -144,9 +137,12 @@ export default function Dashboard() {
                   Check Out
                 </button>
               ) : (
-                <span className="bg-tmc-500/20 text-tmc-300 border border-tmc-500/30 px-4 py-1.5 rounded-lg text-sm font-semibold">
-                  Checked Out
-                </span>
+                <button
+                  onClick={handleCheckIn}
+                  className="bg-tmc-500 hover:bg-tmc-600 text-white font-semibold px-5 py-2 rounded-lg transition-colors text-sm"
+                >
+                  Check In
+                </button>
               )}
             </div>
 

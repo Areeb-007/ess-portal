@@ -198,7 +198,7 @@ function reducer(state, action) {
       const exists = state.attendance.find(a => a.date === today)
       if (exists) {
         const attendance = state.attendance.map(a =>
-          a.date === today ? { ...a, checkIn: action.payload.time } : a
+          a.date === today ? { ...a, checkIn: action.payload.time, checkOut: null } : a
         )
         return { ...state, attendance }
       }
